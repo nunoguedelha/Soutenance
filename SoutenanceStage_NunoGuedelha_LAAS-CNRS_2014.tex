@@ -3,7 +3,7 @@
 %\usecolortheme{beaver}
 
 %Include all packages
-\ProvidesPackage{mySlideShowStyle}
+\ProvidesPackage{./tex/mySlideShowStyle}
 
 
 
@@ -67,38 +67,258 @@
   \end{itemize}
   \end{block}
 \end{frame}
-%==========================================================
 
 \begin{frame}
   \frametitle{Objectifs}
   \framesubtitle{}
-  Activité de d'intégration d'outils
-  Int
 \end{frame}
 %==========================================================
 
+\section{Modélisation Dynamique.}
+
+%==========================================================
+
+\section{Contraintes en performances}
+
+%==========================================================
+
+\section{Formalisme de l'Algèbre Spatiale}
+
+%==========================================================
+
+\section{Algorithme de Dynamique Hybride}
+
+\subsection{principes et implémentation}
+
 \begin{frame}
-  \frametitle{Pourquoi ce stage?}
+  \frametitle{Etat initial de metapod et besoins}
+ 
+  Algorithmes déjà implémentés:
+  Dynamique inverse:	Recursive Newton-Euler Algorithm
+  Dynamique directe:	Composite-Rigid-Body Algorithm
+  
+  Algorithmes à implémenter et intégrer à la Dynamique Hybride:
+  Calcul optimisé de $H$
+  Dynamique directe:	résolution de $H \ddot{q}=\tau - C$
+  Dynamique inverse différentielle
+  
+\end{frame}
+
+%\begin{frame}
+%
+%  \frametitle[allowframebreaks]{Equation de mouvement}
+%
+%  équation de mouvement d'un arbre cinématique:
+%  
+%  <equ 3.1>
+%  
+%  <description des variables>
+%  
+%  (pour chaque articulation $i$ on connaît soit le couple soit l'accélération)
+%  articulations\emph{fd} "forward dynamics" => $\tau_i$ connu
+%  articulation \emph{id} "inverse dynamics" => $\ddot{q}_i$ connu
+%  
+%  ordre par défaut (pour tous les algorithmes) de $q_i$ dans $\mathbf{q}$ (exemple):
+%  
+%  <figure 3.1>
+%  
+%  => ordre du parcours en profondeur DFS:
+%  
+%\begin{align*}
+%\ddot{q} &= 
+%\begin{bmatrix}
+%  \ddot{q}_1 & \ddot{q}_2 & \textcolor{blue}{\ddot{q}_4} & \ddot{q}_5 & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_6 & \ddot{q}_7
+%\end{bmatrix}^T \\
+%Q \ddot{q} &= 
+%\begin{bmatrix}
+%  \textcolor{blue}{\ddot{q}_4} & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_1 & \ddot{q}_2 & \ddot{q}_5 & \ddot{q}_6 & \ddot{q}_7
+%\end{bmatrix}
+%=
+%\begin{bmatrix}
+%  \underline{\ddot{q}_1} \\
+%  \underline{\ddot{q}_2}
+%\end{bmatrix} \\
+%\textnormal{ et de même } \\
+%Q \tau &= 
+%\begin{bmatrix}
+%  \underline{\tau_1} \\
+%  \underline{\tau_2}
+%\end{bmatrix}
+%\quad \textnormal{et} \quad
+%Q C = 
+%\begin{bmatrix}
+%  C_1 \\
+%  C_2
+%\end{bmatrix}
+%\quad \textnormal{et} \quad
+%Q H Q^T = 
+%\begin{bmatrix}
+%  H_{11} & H_{12} \\
+%  H_{21} & H_{22}
+%\end{bmatrix} 
+%\end{align*}
+%
+%  Reformulation de l'équation de mouvement (3.2 => inconnues rassemblées à gauche):
+%  
+%  <equ 3.5> \label{equ_equationMvt_dynHyb1}
+%  <equ 3.2 et 3.3> \label{equ_equationMvt_dynHyb2}
+%  
+%\end{frame}
+%
+%\begin{frame}
+%
+%  \frametitle{Quatre étapes de résolution...}
+%  
+%  \eqref{equ_equationMvt_dynHyb2} Se décline en 2 lignes...
+%  
+%  $H_{11} \ddot{q}_1 = \tau_1 - C'_1$ --> résoudre $\ddot{q}_1$ \\
+%\begin{align*}
+%&H_{21} \ddot{q}_1 - \tau_2 = -C'_2
+%\iff
+%&\tau_2 = C'_2 + H_{21} \ddot{q}_1
+%\end{align*}
+%
+%(introduire les deux premières étapes et numéroter 1-4)
+%
+%\end{frame}
+%
+%\begin{frame}
+%  \frametitle{Calcul des coefficients...}
+%  
+%(garder au coin haut supérieur les 2 équations de mouvement)
+%
+%Calcul de $C'$: 
+%\begin{align*}
+%\textnormal{Pour} \quad \ddot{q}=
+%\begin{bmatrix}
+%  0 \\
+%  \ddot{q}_2
+%\end{bmatrix}
+%: 
+%&\left{
+%\eqref{equ_equationMvt_dynHyb2}
+%\iff
+%\begin{bmatrix}
+%  C'_1 \\
+%  C'_2
+%\end{bmatrix}
+%=
+%\begin{bmatrix}
+%  \tau_1 \\
+%  \tau_2
+%\end{bmatrix} \\
+%\eqref{equ_equationMvt_dynHyb1}
+%\iff
+%\begin{bmatrix}
+%  C'_1 \\
+%  C'_2
+%\end{bmatrix}
+%=
+%Q \mathrm{ID} \left( q,\dot{q},Q^T
+%\begin{bmatrix}
+%  0 \\
+%  \ddot{q}_2
+%\end{bmatrix} \right)
+%\right.
+%\iff
+%&\begin{bmatrix}
+%  C'_1 \\
+%  C'_2
+%\end{bmatrix}
+%=
+%Q \mathrm{ID} \left( q,\dot{q},Q^T
+%\begin{bmatrix}
+%  0 \\
+%  \ddot{q}_2
+%\end{bmatrix} \right)
+%\end{align*}
+%
+%Calcul de $H_{11}$ sous-matrice de $H$
+%  - calcul de $H = \mathrm{CRBA}(modèle,q)$
+%  - permutation $H' = Q H Q^T$
+%  - sélection de $H_{11}$ (méthode d'accès par blocs de la classe \verb;Eigen::Matrix; => \verb;H'.block<n_{fd},n_{fd};)
+%
+%\end{frame}
+%
+%\begin{frame}
+%  \frametitle{Résolution des équations...}
+%  
+%Résoudre $\ddot{q}_1$ \\
+%  Système linéaire: $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
+%  Inversion de $H$ trop coûteuse (complexité $O(n^3)$ (où n est la dimension de $H$)
+%  => décomposition de $H$
+%  
+%Choix de la décomposition:
+%  $H$ et $H_{11}$ symétriques, définies positives 
+%  [tableau avec complexité des diff. méthodes]
+%\setlength{\intextsep}{0pt}
+%\setlength{\columnsep}{0cm}
+%\begin{wraptable}[7]{r}{0.45\textwidth}\raggedleft
+%\begin{tabular}[H]{|l|c|}
+%\hline
+%Décomposition ou méthode & Complexité $O$ \\ \hline \hline
+%inversion directe de matrice & $O(n^3)$ \\ \hline
+%LLT et LDLT & $O(n^3/3)$ \\ \hline
+%LU & $O(2n^3/3)$ \\ \hline
+%QR & $O(4n^3/3)$ \\
+%\hline
+%\end{tabular}
+%\end{wraptable}
+%  => factorisation LDL^T (robuste, rapide, la plus appropriée):
+%  $H_{11} = L D L^T$
+%  ($D$ matrice diagonale,
+%   $L$ matrice triangulaire inférieure et $\forall i: L_{ii}=1$)
+%  Solveur \verb;Eigen::LDLT;
+%
+%Calcul de $\tau_2$:
+%  Sélection de $H_{21}$ dans  $H'$
+%  $\tau_2 = C'_2 + H_{21} \ddot{q}_1$
+%
+%\end{frame}
+%
+%\begin{frame}
+%  \frametitle{Algorithme complet:}
+%  
+%  <algo 3.1.1>
+%  
+%\end{frame}
+%==========================================================
+
+\begin{frame}
+  \frametitle{}
   \framesubtitle{}
 \end{frame}
 %==========================================================
 
 \begin{frame}
-  \frametitle{Pourquoi ce stage?}
+  \frametitle{}
   \framesubtitle{}
 \end{frame}
 %==========================================================
 
 \begin{frame}
-  \frametitle{Pourquoi ce stage?}
+  \frametitle{}
   \framesubtitle{}
 \end{frame}
 %==========================================================
 
-\begin{frame}
-  \frametitle{Pourquoi ce stage?}
-  \framesubtitle{}
-\end{frame}
 %==========================================================
+
+\subsection{Optimisations}
+
+%==========================================================
+\section{Méthodes et outils}
+
+\subsection{Méthodes de développement et de validation}
+
+%==========================================================
+
+\subsection{Outils de développement}
+
+%==========================================================
+
+\section{Conclusion}
+
+
 
 \end{document}

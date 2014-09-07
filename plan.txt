@@ -24,7 +24,7 @@ Plan...
 
 %====================================================================================================================
 
-- Modélisation Dynamique. 
+- La Modélisation Dynamique. 
 
   Indispensable dans certains cas:
     => robot articulé, membres à l'inertie non négligeable
@@ -216,9 +216,9 @@ génère du code optimisé spécifique au modèle $M$
 \end{minipage}
 
          
-%====================================================================================================================
+%===================================   integre  =====================================================================
 
-- l'Algorithme de Dynamique Hybride
+- Algorithme de Dynamique Hybride
 
   principes et implémentation ===========
   
@@ -484,6 +484,8 @@ e: reconstruction de $\tau$ et $\ddot{q}$  & 0.677407     & 0.12      & 0.683246
 
 %====================================================================================================================
 
+Méthodes de développement et de validation
+
 - Cycle de développement:
     spécification de l'algorithme, des contraintes --> développement --> tests unitaires (--> développement) --> validation fonctionnelle(--> spécifications) --> évaluation de performances(--> spécifications d'optimisations et nouveau cycle)
     
@@ -496,6 +498,8 @@ e: reconstruction de $\tau$ et $\ddot{q}$  & 0.677407     & 0.12      & 0.683246
     Mesures de temps d'exécution sur 100000 itérations
 
 %====================================================================================================================
+
+Outils de développement
 
 - langages et outils de développement:
     template C++ et Méta programmation
