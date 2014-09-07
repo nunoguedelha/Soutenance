@@ -163,7 +163,7 @@ génère du code optimisé spécifique au modèle $M$
   Modélisation de l'arbre cinématique: définition du graphe connecté
     Description d'un arbre cinématique:
     <schéma corps et arbre cin> (à créer)
-    (animation montrant la numérotation et lesnotions prédécesseur, succ, \nu \mu etc)
+    (animation montrant la numérotation et les notions prédécesseur, succ, \nu \mu etc)
     - numérotation:
       - noeud $i$ = corps $i$, arc $i$ = articulation $i$ ($i \in [1,N]$)
       - noeud racine (0) = base fixe
@@ -178,6 +178,7 @@ génère du code optimisé spécifique au modèle $M$
 \item $\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$)
 \item $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$
 \item $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$
+\item $\nu(fd)$: est le sous-arbre supporté par au moins un articulation $fd$
 \end{itemize}
 
     on illustre les ensembles qu'on vient de décrire.\\
@@ -208,6 +209,12 @@ génère du code optimisé spécifique au modèle $M$
 \label{fig_chdaArbreK_p_s_k_mu_nu}
 \end{figure}
 
+\setmyFiguresFile{optimisations}
+
+\begin{minipage}[c]{0.5\textwidth}
+  \dispFig[H]{5}{0.7\textwidth}{Exemple de $\nu(fd)$ dans l'arbre cinématique. Le noeud 1 n'appartient pas à $\nu(fd)$}{fig_chdaArbreK_nuFD}
+\end{minipage}
+
          
 %====================================================================================================================
 
@@ -231,11 +238,275 @@ génère du code optimisé spécifique au modèle $M$
   <description des variables>
   
   (pour chaque articulation $i$ on connaît soit le couple soit l'accélération)
+  articulations\emph{fd} "forward dynamics" => $\tau_i$ connu
+  articulation \emph{id} "inverse dynamics" => $\ddot{q}_i$ connu
   
+  ordre par défaut (pour tous les algorithmes) de $q_i$ dans $\mathbf{q}$ (exemple):
+  
+  <figure 3.1>
+  
+  => ordre du parcours en profondeur DFS:
+  
+\begin{align*}
+\ddot{q} &= 
+\begin{bmatrix}
+  \ddot{q}_1 & \ddot{q}_2 & \textcolor{blue}{\ddot{q}_4} & \ddot{q}_5 & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_6 & \ddot{q}_7
+\end{bmatrix}^T \\
+Q \ddot{q} &= 
+\begin{bmatrix}
+  \textcolor{blue}{\ddot{q}_4} & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_1 & \ddot{q}_2 & \ddot{q}_5 & \ddot{q}_6 & \ddot{q}_7
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \underline{\ddot{q}_1} \\
+  \underline{\ddot{q}_2}
+\end{bmatrix} \\
+\textnormal{ et de même } \\
+Q \tau &= 
+\begin{bmatrix}
+  \underline{\tau_1} \\
+  \underline{\tau_2}
+\end{bmatrix}
+\quad \textnormal{et} \quad
+Q C = 
+\begin{bmatrix}
+  C_1 \\
+  C_2
+\end{bmatrix}
+\quad \textnormal{et} \quad
+Q H Q^T = 
+\begin{bmatrix}
+  H_{11} & H_{12} \\
+  H_{21} & H_{22}
+\end{bmatrix} 
+\end{align*}
 
+  Reformulation de l'équation de mouvement (3.2 => inconnues rassemblées à gauche):
+  
+  <equ 3.5> \label{equ_equationMvt_dynHyb1}
+  <equ 3.2 et 3.3> \label{equ_equationMvt_dynHyb2}
+  
+  Se décline en 2 lignes...
+  
+  $H_{11} \ddot{q}_1 = \tau_1 - C'_1$ --> résoudre $\ddot{q}_1$ \\
+\begin{align*}
+&H_{21} \ddot{q}_1 - \tau_2 = -C'_2
+\iff
+&\tau_2 = C'_2 + H_{21} \ddot{q}_1
+\end{align*}
+
+(introduire les deux premières étapes et numéroter 1-4)
+(garder en bandeau supérieur les 2 équations de mouvement)
+Calcul de $C'$: 
+\begin{align*}
+\textnormal{Pour} \quad \ddot{q}=
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix}
+: 
+&\left{
+\eqref{equ_equationMvt_dynHyb2}
+\iff
+\begin{bmatrix}
+  C'_1 \\
+  C'_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+  \tau_1 \\
+  \tau_2
+\end{bmatrix} \\
+\eqref{equ_equationMvt_dynHyb1}
+\iff
+\begin{bmatrix}
+  C'_1 \\
+  C'_2
+\end{bmatrix}
+=
+Q \mathrm{ID} \left( q,\dot{q},Q^T
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix} \right)
+\right.
+\iff
+&\begin{bmatrix}
+  C'_1 \\
+  C'_2
+\end{bmatrix}
+=
+Q \mathrm{ID} \left( q,\dot{q},Q^T
+\begin{bmatrix}
+  0 \\
+  \ddot{q}_2
+\end{bmatrix} \right)
+\end{align*}
+
+Calcul de $H_{11}$ sous-matrice de $H$
+  - calcul de $H = \mathrm{CRBA}(modèle,q)$
+  - permutation $H' = Q H Q^T$
+  - sélection de $H_{11}$ (méthode d'accès par blocs de la classe \verb;Eigen::Matrix; => \verb;H'.block<n_{fd},n_{fd};)
+
+Résoudre $\ddot{q}_1$ \\
+  Système linéaire: $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
+  Inversion de $H$ trop coûteuse (complexité $O(n^3)$ (où n est la dimension de $H$)
+  => décomposition de $H$
+  
+Choix de la décomposition:
+  $H$ et $H_{11}$ symétriques, définies positives 
+  [tableau avec complexité des diff. méthodes]
+\setlength{\intextsep}{0pt}
+\setlength{\columnsep}{0cm}
+\begin{wraptable}[7]{r}{0.45\textwidth}\raggedleft
+\begin{tabular}[H]{|l|c|}
+\hline
+Décomposition ou méthode & Complexité $O$ \\ \hline \hline
+inversion directe de matrice & $O(n^3)$ \\ \hline
+LLT et LDLT & $O(n^3/3)$ \\ \hline
+LU & $O(2n^3/3)$ \\ \hline
+QR & $O(4n^3/3)$ \\
+\hline
+\end{tabular}
+\end{wraptable}
+  => factorisation LDL^T (robuste, rapide, la plus appropriée):
+  $H_{11} = L D L^T$
+  ($D$ matrice diagonale,
+   $L$ matrice triangulaire inférieure et $\forall i: L_{ii}=1$)
+  Solveur \verb;Eigen::LDLT;
+
+Calcul de $\tau_2$:
+  Sélection de $H_{21}$ dans  $H'$
+  $\tau_2 = C'_2 + H_{21} \ddot{q}_1$
+  
+Algorithme complet:
+  <algo 3.1.1>
+  
+%====================================================================================================================
+
+- Optimisations [cubes]
+
+  Correction du calcul optimal de $^sXp$
+  => rotations à axes parallèles à $Ox$ ou $Oy$ ou $Oz$ du repère lié au corps
+  
+  Calcul de $H$ limité aux coefficients de $H_{11}$ (HCRBA)
+    Calcul de $H$ complet: $\forall noeud_i$ sauf la base, calcul de $H_{ij}$ ($j$ = noeud séléectionné en remontant l'arbre vers la racine)
+    Optimisation $H_{11}$: seuls les noeuds de $\nu(fd)$ sont visités, et $H_{ij}$ calculés pour $i,j \in fd$
+    Optimisation $H_{11}$ + $H_{21}$: calcul étendu au reste de l'arbre si $i \in fd$
+    
+<Figure 3.5 pour H normal>
+<Figure  
+  Dynamique Inverse Différentielle pour le calcul de $\tau_2$
+    (on montre que)
+\begin{equation}
+\tau = C' + ID_{\delta} \left( Q^T \begin{bmatrix} 
+                                     \ddot{q}_1 \\
+                                     0 
+                                   \end{bmatrix} \right) \label{equ_tauIDdiff_2}
+=
+C' + \mathrm{ID}(q,\dot{q},Q^T\begin{bmatrix}
+                                \ddot{q}_1 \\      
+                                0         
+                              \end{bmatrix}) - Q \: \mathrm{ID}(q,\dot{q},0)
+\end{equation}
+    Termes simplifiés entre les 2 fonctions ID => algorithme RNEA simplifié
+  
+- Résultats: temps d'exécutions relatifs à un RNEA classique
+    Mesures du temps d'exécution de chacune des étapes (a -> e) de l'algorithme (4 + reconstruction des vecteurs)
+    Comparaison des optimisations (1 -> 4):
+\begin{enumerate}
+\item matrices de passage à axes fixes prédéfinis
+\item HCRBA(CRBA hybride) $H_{11}-H_{12}-H_{21}$
+\item utilisation du module \emph{Eigen} de Sparsité
+\item HCRBA $H_{11}$ seule + Dynamique Inverse différenciel ($ID_\delta$), sans la sparsité \emph{Eigen}
+\end{enumerate}
+
+  (les optimisations sont cumulées dans l'ordre de numérotation. Voici l'ensemble des mesures réalisées sur notre modèle de robot humanoïde)
+
+\begin{flushleft}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}[H]{|l|l|}
+\hline
+Nom du CPU & Intel(R) Core(TM) i7-4700HQ CPU \\ \hline \hline
+Fréquence & 2.40GHz \\ \hline
+Fréquence bus CPU & 800 MHz \\ \hline
+Nombre de coeurs & 8(4) \\ \hline
+Taille du cache & 6144 Kb \\ \hline
+Distribution & Ubuntu 14.04 LTS (trusty) \\
+\hline
+\end{tabular}
+\caption[Table caption text]{Propriétés du processeur réalisant le test.}
+\label{table:propriétésProc}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}[H]{|l|l|l|}
+\hline
+Version d'implémentation                   & implémentation initiale    & (1)      \\ \hline \hline
+Durée moyenne                              & 16.286723                  & 14.07054 \\
+a: RNEA                                    & 6.39608                    & 5.46801  \\
+b: CRBA                                    & 7.59427                    & 6.31883  \\
+c: $\ddot{q}_1$ (solver)                   & 0.894731                   & 0.872069 \\
+d: $\tau_2$                                & 0.730014                   & 0.734224 \\
+e: reconstruction de $\tau$ et $\ddot{q}$  & 0.671628                   & 0.677407 \\
+\hline
+\end{tabular}
+\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: optimisation liée aux repères à axes fixes.}
+\label{table:performancesOptimAxesFixes}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}[H]{|l|l|l|l|l|l|l|l|l|}
+\hline
+Version d'implémentation                   & \multicolumn{2}{c|}{(1)}  & \multicolumn{2}{c|}{(2)} & \multicolumn{2}{c|}{(3)} & \multicolumn{2}{c|}{(4)} \\ \hline \hline
+                                           & $\mu s$      & (\%)      & $\mu s$     & (\%)   & $\mu s$     & (\%)   & $\mu s$   & (\%) \\ \hline
+Durée moyenne                              & 14.07054     & 2.57      & 11.118823   & 2.16   & 11.626056   & 2.16   & 10.968547 & 2.02 \\
+a: RNEA                                    & 5.46801      & 1         & 5.14257     & 1      & 5.38397     & 1      & 5.42778   & 1    \\
+b: CRBA                                    & 6.31883      & 1.16      & 3.66517     & 0.71   & 3.61689     & 0.67   & 2.3934    & 0.44 \\
+c: $\ddot{q}_1$ (solver)                   & 0.872069     & 0.16      & 0.889762    & 0.17   & 1.21743     & 0.23   & 0.886647  & 0.16 \\
+d: $\tau_2$                                & 0.734224     & 0.13      & 0.738075    & 0.14   & 0.731042    & 0.14   & 2.26072   & 0.42 \\
+e: reconstruction de $\tau$ et $\ddot{q}$  & 0.677407     & 0.12      & 0.683246    & 0.13   & 0.676724    & 0.13   & 0         & 0    \\
+\hline
+\end{tabular}
+\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: les optimisationsspécifiques au CHDA. On a reporté, pour chacune d'elles le gain relatif par rapport à un traitement de référence qui est l'étape 1 (RNEA classique).}
+\label{table:performancesOptimSpecifCHDA}
+\end{center}
+\end{table}
+
+\end{flushleft}
 
 
 %====================================================================================================================
 
-- Support théorique et outils de développement
-      Théorique
+- Cycle de développement:
+    spécification de l'algorithme, des contraintes --> développement --> tests unitaires (--> développement) --> validation fonctionnelle(--> spécifications) --> évaluation de performances(--> spécifications d'optimisations et nouveau cycle)
+    
+- tests unitaires et Validation
+    exécution pas à pas des fonctions créées (gdb, qtcreator)
+    validation de résultats d'algorithmes: traitements alternatifs (HCRBA, RNEA/CRBA)
+    Méta fonctions: comparaison phase compilation vs exécution
+    Matrice de permutation: vérification fonctionnelle et des propriétés 
+    Génération aléatoire de vecteurs de test $q$, $\dot{q}$, $\ddot{q}$, $\tau$
+    Mesures de temps d'exécution sur 100000 itérations
+
+%====================================================================================================================
+
+- langages et outils de développement:
+    template C++ et Méta programmation
+    
+    BOOST pour lier les scripts de tests à \emph{metapo}
+          pour créer des tableaux de types ou d'objets "noeud" templatés
+          
+    Eigen
+    
+    cmake
+
+- Outils d'édition, analyse et gestion de configuration:
+    emacs, Qtcreator, gdb, github, git, gitk, cachegrind
+    
