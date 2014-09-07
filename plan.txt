@@ -1,0 +1,241 @@
+Plan...
+
+- Contexte stage
+      Projet professionnel
+      Le LAAS et Gepetto (activité intégration outils modélisation / simulation
+      
+- objectifs
+      implémenter un algorithme de dynamique hybride dans metapod
+      =>  algorithme optimisé décrit par Roy Featherstone ouvrage “Rigid Body Dynamics Algorithm"
+          publication: Rigid Body Dynamics Algorithms.  Springer, New York, c2008
+          Roy Featherstone: Chercheur spécialisé en modélisation dynamique de robots. Ph.D. à Edinburgh -> univ Australian National -> Professeur invité à l'IIT 
+      =>  Formalisme de Newton-Euler, Algèbre Spatiale (mécanique des torseurs),
+          (vs formalisme Lagrange: effort généralisé sur chaque articulation en termes d'NRJ
+      =>  Metapod, librairie d'algorithmes basés sur l'algèbre spatiale, C++ template méta-programmation
+      
+      Analyser et appliquer les optimisations de Featherstone, combiner avec optimisations Eigen
+      =>  Eigen, librairie templatée
+      =>  optimisations spécifiques à algo dyn hybride (réduire dimension du système à résoudre)
+      =>  optimisation branch sparsity (structure creuse de la matrice d'inertie H)
+      
+      Réflexion sur l'application de la Dynamique Hybride
+      =>  modélisation d'articulation flexibles ("compliant")
+      =>  commande de robot ayant une base flottante
+
+%====================================================================================================================
+
+- Modélisation Dynamique. 
+
+  Indispensable dans certains cas:
+    => robot articulé, membres à l'inertie non négligeable
+    => robot sans base fixe ou roulante (garantir l'appui au sol et l'équilibre)
+  
+  On traite dans cet exposé: arbres cinématiques, pas les boucles
+  
+  Comment poser le problème dynamique. Equation de mouvement (notations):
+  
+\begin{description}
+  \item[$model$ :] le modèle dynamique du système à multi-corps rigides
+  \item[$q, \dot{q}, \ddot{q}$ :] vecteurs de position, vitesse, accélération des articulations du système
+  \item[$\tau$ :] forces/couples moteurs (internes) appliqués aux articulations
+  \item[$f^{ext}$ :] forces de contrainte extérieures (force de gravitation, coriolis, forces de contact, ...)
+\end{description}
+
+  Les 3 types de problème dynamique
+    - dynamique directe  =>  trouver les accélérations induites par les forces appliquées aux articulations
+      Application: simulation
+      
+\begin{equation}
+\ddot{q} = \mathrm{FD}(model,\mathbf{q,\dot{q},\tau})
+\end{equation}
+
+    - dynamique inverse  =>  trouver les forces à appliquer aux accélérations pour produire les articulations voulues
+      Application:  contrôle, composante de dynamique directe ou inverse
+      Utilité du calcul des couples actionneurs robot humanoïde:
+          =>  commande en couple ou 
+          =>  estimation du centre de pression -> injecté dans le PC (preview control) -> générer trajectoire CoM
+      
+\begin{equation}
+\mathbf{\tau} = \mathrm{ID}(model,\mathbf{q,\dot{q},\ddot{q}})
+\end{equation}
+
+    - dynamique hybride  =>  généralisation de de la dynamique directe et inverse
+                             pour chaque articulation, on connaît soit le couple (art. $fd$) soit l'accélération (art. $id$)
+                             L'algo calcule toutes les inconnues ($fd$ ->> FD, $id$ -> ID)
+      Applications: simulation avec contraintes suppl sur une art. (excitation)
+                    simulation simplifiée (certaines accélérations connues)
+                    modéliser système à articulations flexibles
+                    robot sans base fixe (la base flottante est l'articulation "fd", couple appliqué est connu et nul, l'algo donne son accélération => pourrait améliorer l'estimation de la position du centre de pression (ZMP) => utilisé par le filtre dynamique pour corriger la trajectoire du CoM du robot humanoïde
+                    -> $q,\dot{q},\ddot{q} = \mathrm{IK}(modele_ponctuel, c, \dot{c}, \ddot{c}, X^f)$
+                    -> $f,\tau = \mathrm{ID}(modele_complet,q,\dot{q},\ddot{q})$ --> CoP^MB
+                    -> $\delta CoM = PreviewControl(\delta CoP) de Kajita$
+    
+%====================================================================================================================
+
+- Contraintes en performances
+
+On se base sur le cahier des charges de l'RNEA utilisé dans le filtrage dynamique du CoM
+--> [cube de contraintes]
+    - période d'échantillonnage 5ms (1 commande vectorielle $\mathbf{q}$ de 30 DOF) -> $1ms$ pour les calculs de dynamique
+    - fenêtre de filtrage dynamique 1.6s => 32 RNEA
+    => 1 RNEA en $30\mu s$
+    <v> ~ $4\mu s$ sur i7-4700HQ, ~ $15\mu s$ sur HRP2 Core2(TM) Duo E7500
+
+--> précision numérique 0.1%
+
+- Algèbre Spatiale et méta programmation
+
+  - basée sur les torseurs (avec différence de notation), réduit la compléxité de la modélisation dynamique, comb. translation/rotation
+    (composition simplifiée des vitesses et accélérations)
+  - Algos CRBA et RNEA exploitent la récursivité (\emph{pattern} Visiteur), la "sparsité" / abscesnce de couplage entre branches cinématiques
+  - méta prog. => propriétés d'un langage symbolique (calculs inutiles non exécutés)
+  - méta fonctions génèrent des traitements/calculs numériques à la compilation
+    (conditions méta fonction: params->types ou int statiques et constants)
+
+- Architecture de la librairie \emph{metapod}
+
+<Schéma global figure 1.1 p12>
+
+\emph{metapo} fournit algos basés sur modèle dynamique général
+prend un modèle $M$ spécifique (header)
+génère du code optimisé spécifique au modèle $M$
+
+<schéma fonctionnel interne de metapod>
+
+
+%====================================================================================================================
+
+- Les bases de l'algorithme: formalisme de l'Algèbre Spatiale
+
+  mécanique des torseurs avec des notations simplifiées et spécifiques à Featherstone
+
+  Torseurs, vecteurs spaciaux et bases de \emph{Plücker}
+    (torseur: le moment d'un ensemble de vecteurs liés a la forme d'un champ antisymétrique => vecteur et moment du torseur.
+    Le vecteur est l'opérateur du produit vectoriel: f, w.)
+    
+    - torseurs de mouvement: vitesse
+    <figure 2.1(a) p14> et <base de \emph{Plücker}>
+    rotation w autour de p=> vo =  [wo=wp;vo=op x w]
+    translation vp        => vo =  [vp]
+    
+    Voir le corps comme un fluide en mouvement. $v$ = vitesse du flux de points du corps à travers $O$
+    
+%    - torseurs de mouvement: accélération
+%    $ao = d/dt[w;vo] = [\dot{w};\dot{v}_o]$
+%    (Différent de l'accélération classique, liée à un point fixe du corps.
+%    Approche classique -> vo(t+dt) bouge avec le point $O$
+%    Approche spatiale  -> vo(t+dt) lié à un point fixe de l'espace)
+%    
+%    exemples de cas simples: corps en rotation pure => vo=[wp;op x w]
+%                                                    => ao=0
+    
+%    (préparer exercice avec chaîne coplanaire)
+    
+    - torseur de force
+    <figure B.1(b)>
+    force f en p  => fo=[n0=op x f; f]
+    couple np en p=> fo=[np; 0]
+    
+    - moment et inertie
+    vec spatial ĥ: <featherstone equ 2.59>
+    Mêmes propriétés qu'un vecteur force (règles de transformation)
+    NRJ cinétiquee = 1/2ĥ.v (produit scalaire invariant)
+    Inertie: h=Iv => <featherstone equ 2.62>
+    => transformation: <featherstone equ 2.66>
+    
+  vecteurs spatiaux et opérations
+    mêmes propriétés que les torseurs par rapport aux différentes opérations:
+    - somme
+    - produit par un scalaire
+    - produit scalaire, vectoriel
+    => équivalent aux opérations sur les matrices associées aux torseurs
+    
+  Articulations, contraintes
+    - transformations de coordonnées, matrice de passage $^BX_A$
+    - transf. pour torseur de mouvement=> $X$
+      transf. pour torseur de force    => (produit scalaire est invariant=>) $X^{\asterisc}  = (X^{-1})^T = X^{-T}$
+    <figure 2.2> (modèle géométrique d'un \sigma de corps rigides. focus sur $X_{J1} = F0,1 --> F1$
+    vJ (equ 2.2) en fonction de la matrice de sélection $S_k$ du corps $k$. (Vitesse du corps $k$ /r au corps parent. Puis exprimé dans le vecteur monde)
+    Par récursivité surtoute la chaîne cinématique, on exprime $^ov_k$
+    (position de l'articulation /r au corps la supportant. transformation liée à $q$ variable articulaire).
+    Relation entre $S_k$ et $X_{Jk}$:
+    
+  Modélisation de l'arbre cinématique: définition du graphe connecté
+    Description d'un arbre cinématique:
+    <schéma corps et arbre cin> (à créer)
+    (animation montrant la numérotation et lesnotions prédécesseur, succ, \nu \mu etc)
+    - numérotation:
+      - noeud $i$ = corps $i$, arc $i$ = articulation $i$ ($i \in [1,N]$)
+      - noeud racine (0) = base fixe
+      - numérotation ascendante $i \in [1,N]$ telle que $\lambda(i) < i$
+      - arc $i$ connecte corps $i$ à son parent
+      
+    concepts fondamentaux sur la représentation des arbres cinématiques \cite[ch.4.1]{bib_featherstone}:
+
+\begin{itemize}
+\item $p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$
+\item $\lambda(i)$ est le noeud \emph{parent} du corps $i$
+\item $\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$)
+\item $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$
+\item $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$
+\end{itemize}
+
+    on illustre les ensembles qu'on vient de décrire.\\
+
+\begin{figure}[H]
+\minipages[2]{c}{.5}{.5}{}
+{%
+  \begin{center}
+  	\incFig[1]{0.8\textwidth}
+  	\end{center}
+}
+{%
+  \begin{center}
+  	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+  	\hline 
+	articul. $i$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\ 
+  	\hline 
+  	$p$ & 0 & 1 & 1 & 2 & 2 & 3 & 3 \\ 
+  	\hline 
+  	$s$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\ 
+  	\hline 
+  	$\lambda$ & 0 & 1 & 1 & 2 & 2 & 3 & 3 \\ 
+  	\hline 
+  	\end{tabular} 
+  \end{center}
+}{}
+\caption{$p$, $s$, $\lambda$, $\kappa$, $\mu$ et $\nu$ dans l'arbre cinétique}
+\label{fig_chdaArbreK_p_s_k_mu_nu}
+\end{figure}
+
+         
+%====================================================================================================================
+
+- l'Algorithme de Dynamique Hybride
+
+  principes et implémentation ===========
+  
+  Algorithmes déjà implémentés:
+  Dynamique inverse:	Recursive Newton-Euler Algorithm
+  Dynamique directe:	Composite-Rigid-Body Algorithm
+  
+  Algorithmes à implémenter et intégrer à la Dynamique Hybride:
+  Calcul optimisé de $H$
+  Dynamique directe:	résolution de $H \ddot{q}=\tau - C$
+  Dynamique inverse différentielle
+  
+  équation de mouvement d'un arbre cinématique:
+  
+  <equ 3.1>
+  
+  <description des variables>
+  
+  (pour chaque articulation $i$ on connaît soit le couple soit l'accélération)
+  
+
+
+
+%====================================================================================================================
+
+- Support théorique et outils de développement
+      Théorique

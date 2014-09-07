@@ -1,69 +1,104 @@
 \documentclass[11pt]{beamer}
 \usetheme{Darmstadt}
+%\usecolortheme{beaver}
 
-%Packages pour les langues
-\usepackage[utf8]{inputenc}
-\usepackage[french]{babel}
-\usepackage[T1]{fontenc}
-\usepackage{float}
-\usepackage{lmodern}
+%Include all packages
+\ProvidesPackage{mySlideShowStyle}
 
-%Package pour la mise en forme
-\usepackage{parallel}
-\usepackage{setspace}
-\usepackage{wrapfig}
-
-%Packages pour les liens dynamiques
-\usepackage{hyperref}
-\usepackage{multicol}
-%\usepackage{underscore}
-
-%Packages pour les formules de Maths
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{mathrsfs}
-\usepackage{mathtools}
-\usepackage{pseudocode}
-\usepackage{fancybox}
-
-%Packages des images
-\usepackage{graphicx}
-%\usepackage{subfigure}
-\usepackage{subfig}
-\usepackage{wrapfig}
-\usepackage{caption}
-%\usepackage{subcaption}
-
-%Packages pour les string
-\usepackage{xstring}
-
-%Packages pour les listes
-%\usepackage{enumitem}
-\usepackage{moreverb}
 
 
 %%%%%%%%%%%%%%%%%
 \author{Nuno Guedelha}
-\title{Title}
+\title{Implémentation et application d'un algorithme de Dynamique Hybride}
 %\setbeamercovered{transparent} 
 %\setbeamertemplate{navigation symbols}{} 
 %\logo{} 
-%\institute{} 
-%\date{} 
+\institute{LAAS-CNRS}
+\date{} 
 %\subject{} 
+
+\setbeamertemplate{footline}{
+\leavevmode%
+\hbox{\hspace*{-0.06cm}
+\begin{beamercolorbox}[wd=.2\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+	\usebeamerfont{author in head/foot}\insertshortauthor%~~(\insertshortinstitute)
+\end{beamercolorbox}%
+\begin{beamercolorbox}[wd=.55\paperwidth,ht=2.25ex,dp=1ex,center]{section in head/foot}%
+	\usebeamerfont{section in head/foot}\insertshorttitle
+\end{beamercolorbox}%
+\begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,right]{section in head/foot}%
+	\usebeamerfont{section in head/foot}\insertshortdate{}\hspace*{2em}
+	\insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+\end{beamercolorbox}}%
+\vskip0pt%
+}
+
 \begin{document}
 
 \begin{frame}
 \titlepage
 \end{frame}
+%==========================================================
 
-%\begin{frame}
-%\tableofcontents
-%\end{frame}
-
-\begin{frame}{•}
-
+\begin{frame}
+\tableofcontents
 \end{frame}
+%==========================================================
+
+\section{Introduction}
+
+\begin{frame}
+  \frametitle{Contexte du stage}
+  \framesubtitle{}
+  \begin{block}{Projet professionnel}
+  \begin{itemize}
+    \item première expérience dans l'embarqué et le temps réel
+    \item nouveau cap: la robotique mobile et le Master 2 IRR
+    \item Objectif: chercheur en Robotique (entreprise ou laboratoire)
+  \end{itemize}
+  \end{block}
+  \begin{block}{Le LAAS et Gepetto}
+  \begin{itemize}
+    \item Gepetto: expertise en analyse, génération de mouvements  
+    \item Approche fondamentale, modélisation dynamique, contrôle, planification de mouvements
+    \item {Intégration dans des packages open source \\
+          $\Rsh$ metapod: librairie de modélisation dynamique}
+    \note{}
+  \end{itemize}
+  \end{block}
+\end{frame}
+%==========================================================
+
+\begin{frame}
+  \frametitle{Objectifs}
+  \framesubtitle{}
+  Activité de d'intégration d'outils
+  Int
+\end{frame}
+%==========================================================
+
+\begin{frame}
+  \frametitle{Pourquoi ce stage?}
+  \framesubtitle{}
+\end{frame}
+%==========================================================
+
+\begin{frame}
+  \frametitle{Pourquoi ce stage?}
+  \framesubtitle{}
+\end{frame}
+%==========================================================
+
+\begin{frame}
+  \frametitle{Pourquoi ce stage?}
+  \framesubtitle{}
+\end{frame}
+%==========================================================
+
+\begin{frame}
+  \frametitle{Pourquoi ce stage?}
+  \framesubtitle{}
+\end{frame}
+%==========================================================
 
 \end{document}
