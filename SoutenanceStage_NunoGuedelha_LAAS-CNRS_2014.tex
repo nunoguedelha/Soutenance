@@ -1,9 +1,52 @@
 \documentclass[11pt]{beamer}
+%\usetheme{Amsterdam}
 \usetheme{Darmstadt}
 %\usecolortheme{beaver}
 
 %Include all packages
-\ProvidesPackage{./tex/mySlideShowStyle}
+%\ProvidesPackage{./tex/mySlideShowStyle}
+%Packages pour les langues
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{float}
+\usepackage{lmodern}
+\usepackage{multimedia}
+
+%Package pour la mise en forme
+\usepackage{parallel}
+\usepackage{setspace}
+\usepackage{wrapfig}
+
+%Packages pour les liens dynamiques
+\usepackage{hyperref}
+\usepackage{multicol}
+%\usepackage{underscore}
+
+%Packages pour les formules de Maths
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{mathabx}
+\usepackage{pseudocode}
+\usepackage{fancybox}
+
+%Packages des images
+\usepackage{graphicx}
+%\usepackage{subfigure}
+\usepackage{subfig}
+\usepackage{wrapfig}
+\usepackage{caption}
+%\usepackage{subcaption}
+
+%Packages pour les string
+\usepackage{xstring}
+
+%Packages pour les listes
+%\usepackage{enumitem}
+\usepackage{moreverb}
 
 
 
@@ -35,15 +78,23 @@
 
 \begin{document}
 
+
+%==========================================================
+\input{./tex/macros.tex}
+%==========================================================
+
 \begin{frame}
 \titlepage
 \end{frame}
 %==========================================================
 
-\begin{frame}
-\tableofcontents
+\begin{frame}{Plan}
+\tableofcontents[part=01]
+\tableofcontents[part=02]
 \end{frame}
 %==========================================================
+
+\part{}
 
 \section{Introduction}
 
@@ -62,7 +113,7 @@
     \item Gepetto: expertise en analyse, génération de mouvements  
     \item Approche fondamentale, modélisation dynamique, contrôle, planification de mouvements
     \item {Intégration dans des packages open source \\
-          $\Rsh$ metapod: librairie de modélisation dynamique}
+          $\hookrightarrow$ metapod: librairie de modélisation dynamique}
     \note{}
   \end{itemize}
   \end{block}
@@ -74,114 +125,271 @@
 \end{frame}
 %==========================================================
 
-\section{Modélisation Dynamique.}
+\section{Modélisation Dynamique}
+
+\begin{frame}
+  \frametitle{}
+  \framesubtitle{}
+\end{frame}
 
 %==========================================================
 
 \section{Contraintes en performances}
 
+\begin{frame}
+  \frametitle{}
+  \framesubtitle{}
+\end{frame}
+
 %==========================================================
 
-\section{Formalisme de l'Algèbre Spatiale}
+\section{Formalisme: l'Algèbre Spatiale}
+
+\begin{frame}
+  \frametitle{}
+  \framesubtitle{}
+\end{frame}
 
 %==========================================================
 
-\section{Algorithme de Dynamique Hybride}
+\part{}
+\section{L'algorithme de Dynamique Hybride}
 
-\subsection{principes et implémentation}
+\subsection{Principes et implémentation}
 
 \begin{frame}
   \frametitle{Etat initial de metapod et besoins}
  
   Algorithmes déjà implémentés:
-  Dynamique inverse:	Recursive Newton-Euler Algorithm
-  Dynamique directe:	Composite-Rigid-Body Algorithm
-  
+  \begin{itemize}
+  \item Dynamique inverse:	"Recursive Newton-Euler Algorithm"
+  \item Dynamique directe:	"Composite-Rigid-Body Algorithm"
+  \end{itemize}
+  \bigskip
   Algorithmes à implémenter et intégrer à la Dynamique Hybride:
-  Calcul optimisé de $H$
-  Dynamique directe:	résolution de $H \ddot{q}=\tau - C$
-  Dynamique inverse différentielle
+  \begin{itemize}
+  \item Calcul optimisé de $H$
+  \item Dynamique directe:	résolution de $H \boldsymbol{\ddot{q} = \tau - C}$
+  \item Dynamique inverse différentielle: $\mathrm{ID}_{\delta}(\boldsymbol{\ddot{q}}) = \mathrm{ID}(\boldsymbol{\ddot{q}}) - \mathrm{ID}(0)$
+  \end{itemize}
   
 \end{frame}
 
-%\begin{frame}
-%
-%  \frametitle[allowframebreaks]{Equation de mouvement}
-%
-%  équation de mouvement d'un arbre cinématique:
-%  
-%  <equ 3.1>
-%  
-%  <description des variables>
-%  
-%  (pour chaque articulation $i$ on connaît soit le couple soit l'accélération)
-%  articulations\emph{fd} "forward dynamics" => $\tau_i$ connu
-%  articulation \emph{id} "inverse dynamics" => $\ddot{q}_i$ connu
-%  
-%  ordre par défaut (pour tous les algorithmes) de $q_i$ dans $\mathbf{q}$ (exemple):
-%  
-%  <figure 3.1>
-%  
-%  => ordre du parcours en profondeur DFS:
-%  
-%\begin{align*}
-%\ddot{q} &= 
-%\begin{bmatrix}
-%  \ddot{q}_1 & \ddot{q}_2 & \textcolor{blue}{\ddot{q}_4} & \ddot{q}_5 & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_6 & \ddot{q}_7
-%\end{bmatrix}^T \\
-%Q \ddot{q} &= 
-%\begin{bmatrix}
-%  \textcolor{blue}{\ddot{q}_4} & \textcolor{blue}{\ddot{q}_3} & \ddot{q}_1 & \ddot{q}_2 & \ddot{q}_5 & \ddot{q}_6 & \ddot{q}_7
-%\end{bmatrix}
-%=
-%\begin{bmatrix}
-%  \underline{\ddot{q}_1} \\
-%  \underline{\ddot{q}_2}
-%\end{bmatrix} \\
-%\textnormal{ et de même } \\
-%Q \tau &= 
-%\begin{bmatrix}
-%  \underline{\tau_1} \\
-%  \underline{\tau_2}
-%\end{bmatrix}
-%\quad \textnormal{et} \quad
-%Q C = 
-%\begin{bmatrix}
-%  C_1 \\
-%  C_2
-%\end{bmatrix}
-%\quad \textnormal{et} \quad
-%Q H Q^T = 
-%\begin{bmatrix}
-%  H_{11} & H_{12} \\
-%  H_{21} & H_{22}
-%\end{bmatrix} 
-%\end{align*}
-%
-%  Reformulation de l'équation de mouvement (3.2 => inconnues rassemblées à gauche):
-%  
-%  <equ 3.5> \label{equ_equationMvt_dynHyb1}
-%  <equ 3.2 et 3.3> \label{equ_equationMvt_dynHyb2}
-%  
-%\end{frame}
-%
-%\begin{frame}
-%
-%  \frametitle{Quatre étapes de résolution...}
-%  
-%  \eqref{equ_equationMvt_dynHyb2} Se décline en 2 lignes...
-%  
-%  $H_{11} \ddot{q}_1 = \tau_1 - C'_1$ --> résoudre $\ddot{q}_1$ \\
-%\begin{align*}
-%&H_{21} \ddot{q}_1 - \tau_2 = -C'_2
-%\iff
-%&\tau_2 = C'_2 + H_{21} \ddot{q}_1
-%\end{align*}
-%
-%(introduire les deux premières étapes et numéroter 1-4)
-%
-%\end{frame}
-%
+\begin{frame}
+
+  \frametitle{Equation de mouvement}
+  
+  \begin{block}{équation de mouvement d'un arbre cinématique:}
+  \begin{equation} \label{equ_equationMvt}
+	H\bsy{(q) \ddot{q} + C(q,\dot{q},f^{ext}) = \tau}
+	\end{equation}
+  \end{block}
+  
+  \begin{description}
+    \item[$\bsy{q, \dot{q}, \ddot{q}}$ :] vecteurs de position, vitesse, accélération
+    \item[$\bsy{\tau}$ :] forces/couples moteurs (internes)
+    \item[$\bsy{H}$ :] matrice des termes inertiels
+    \item[$\bsy{C}$ :] forces de précontrainte extérieures
+  \end{description}
+  
+  \note{pour chaque articulation $i$ on connaît soit le couple soit l'accélération}
+  \begin{equation*}
+  q_i
+  \begin{cases}
+  \text{articulation $fd$ "forward dynamics"}: &\tau_i \text{ connu} \\
+  \text{articulation $id$ "inverse dynamics"}: &\ddot{q}_i \text{ connu}
+  \end{cases}
+  \end{equation*}
+  
+  ordre par défaut de $q_i$ dans $\boldsymbol{q}$:
+  $\hookrightarrow$ suivant parcours DFS
+  
+  \note{ordre pour tous les algorithmes}
+
+\end{frame}
+
+\begin{frame}
+
+  \frametitle{Permutation des vecteurs et coefficients...}
+  \setmyFiguresFile{hybridDynamics4etapes}
+  \begin{columns}[T]
+    \begin{column}{.7\textwidth}\small
+	  \begin{align*}
+		\ddot{q} &= 
+		\begin{bmatrix}
+		  \ddot{q}_1 & \ddot{q}_2 & \textcolor{red}{\ddot{q}_4} & \ddot{q}_5 & \textcolor{red}{\ddot{q}_3} & \ddot{q}_6 & \ddot{q}_7
+		\end{bmatrix}^T \\
+		Q \ddot{q} &= 
+		\begin{bmatrix}
+		  \textcolor{red}{\ddot{q}_4} & \textcolor{red}{\ddot{q}_3} & \ddot{q}_1 & \ddot{q}_2 & \ddot{q}_5 & \ddot{q}_6 & \ddot{q}_7
+		\end{bmatrix}
+		=
+		\begin{bmatrix}
+		  \underline{\ddot{q}_1} \\
+		  \underline{\ddot{q}_2}
+		\end{bmatrix} \\
+		\textnormal{ et } &\textnormal{de même } \\
+		Q \tau &= 
+		\begin{bmatrix}
+		  \underline{\tau_1} \\
+		  \underline{\tau_2}
+		\end{bmatrix}
+		\: , \:
+		Q C = 
+		\begin{bmatrix}
+		  C_1 \\
+		  C_2
+		\end{bmatrix}
+		\: , \: Q H Q^T = 
+		\begin{bmatrix}
+		  H_{11} & H_{12} \\
+		  H_{21} & H_{22}
+		\end{bmatrix} 
+		\end{align*}
+  \end{column}%
+  \hfill%
+  \begin{column}{.3\textwidth}
+    \dispFig[H]{1}{\textwidth}{Arbre cinématique}{fig_chdaArbreK1}
+  \end{column}%
+  \end{columns} \pause
+	
+	\begin{columns}[T]
+	\begin{column}{.5\textwidth}\footnotesize
+	\begin{alertblock}{équation de mouvement reformulée:}
+	  \begin{align}
+	  	\begin{bmatrix}
+		  H_{11} & H_{12} \\
+		  H_{21} & H_{22}
+		\end{bmatrix} 
+		\cdot
+		\begin{bmatrix}
+		  \ddot{q}_{1} \\
+		  \ddot{q}_{2}
+		\end{bmatrix} 
+		= 
+		\begin{bmatrix}
+		  \tau_{1} \\
+		  \tau_{2}
+		\end{bmatrix} 
+		-
+		\begin{bmatrix}
+		  C_{1} \\
+		  C_{2}
+		\end{bmatrix} \label{equ_local_eqMvt_2}
+		\end{align}
+	\end{alertblock}
+	\end{column}
+
+	\begin{column}{.5\textwidth}\footnotesize
+	\begin{alertblock}{Inconnues rassemblées à gauche:}
+		\begin{align}
+		\begin{bmatrix}
+		  H_{11} & 0 \\
+		  H_{21} &  -I
+		\end{bmatrix} 
+		\cdot
+		\begin{bmatrix}
+		  \ddot{q}_1 \\
+		  \tau_2
+		\end{bmatrix} 
+		=
+		\begin{bmatrix}
+		  \tau_1 \\
+		  0
+		\end{bmatrix} 
+		-
+		\begin{bmatrix}
+		  C'_{1} \\
+		  C'_{2}
+		\end{bmatrix} \label{equ_equationMvt_dynHyb2} \\
+		\notag \\
+		{\tiny \textnormal{Avec} \qquad
+		\begin{bmatrix}
+		  C'_{1} \\
+		  C'_{2}
+		\end{bmatrix}
+		=
+		\begin{bmatrix}
+		  C_{1} \\
+		  C_{2}
+		\end{bmatrix}
+		+
+		\begin{bmatrix}
+		  H_{12} \ddot{q}_2 \\
+		  H_{22} \ddot{q}_2
+		\end{bmatrix}} \label{equ_cPrime}
+		\end{align}
+	\end{alertblock}
+	\end{column}
+	\end{columns}
+  
+\end{frame}
+
+\begin{frame}
+
+  \frametitle{Quatre étapes de résolution...}
+  
+  % affichage au coin droit supérieur des équations de référence
+  \begin{columns}[t]
+  \begin{column}{.6\textwidth}
+    equ.\eqref{equ_equationMvt_dynHyb2} Se décline en 2 lignes... \bigskip \\
+    \begin{enumerate}
+    \item <3-> calcul de $\boldsymbol{C'}$
+    \item <3-> calcul de $H_{11}$
+    \item <1-> ${\eqref{equ_equationMvt_dynHyb2} \implies H_{11} \bsy{\ddot{q}_1 = \tau_1 - C'_1}}$ \\
+    $\hookrightarrow$ résoudre $\ddot{q}_1$
+    \item <2-> $\eqref{equ_equationMvt_dynHyb2} \implies \bsy{\tau_2 = C'_2} + H_{21} \bsy{\ddot{q}_1}$
+    \end{enumerate}
+  \end{column}
+  \begin{column}{.37\textwidth}
+  	\begin{block}{équations de mouvement reformulées:}\tiny
+	  \begin{align*}
+	  	\begin{bmatrix}
+		  H_{11} & H_{12} \\
+		  H_{21} & H_{22}
+		\end{bmatrix} 
+		\cdot
+		\begin{bmatrix}
+		  \ddot{q}_{1} \\
+		  \ddot{q}_{2}
+		\end{bmatrix} 
+		&= 
+		\begin{bmatrix}
+		  \tau_{1} \\
+		  \tau_{2}
+		\end{bmatrix} 
+		-
+		\begin{bmatrix}
+		  C_{1} \\
+		  C_{2}
+		\end{bmatrix} \quad \eqref{equ_local_eqMvt_2} \\
+		\notag \\
+		\begin{bmatrix}
+		  H_{11} & 0 \\
+		  H_{21} &  -I
+		\end{bmatrix} 
+		\cdot
+		\begin{bmatrix}
+		  \ddot{q}_1 \\
+		  \tau_2
+		\end{bmatrix} 
+		&=
+		\begin{bmatrix}
+		  \tau_1 \\
+		  0
+		\end{bmatrix} 
+		-
+		\begin{bmatrix}
+		  C'_{1} \\
+		  C'_{2}
+		\end{bmatrix} \quad \eqref{equ_equationMvt_dynHyb2} \\
+		\end{align*}
+	\end{block}
+  \end{column}
+  \end{columns}
+
+\end{frame}
+
 %\begin{frame}
 %  \frametitle{Calcul des coefficients...}
 %  
@@ -307,18 +515,32 @@
 \subsection{Optimisations}
 
 %==========================================================
-\section{Méthodes et outils}
+\section{Méthodes}
 
 \subsection{Méthodes de développement et de validation}
+
+\begin{frame}
+  \frametitle{}
+  \framesubtitle{}
+\end{frame}
 
 %==========================================================
 
 \subsection{Outils de développement}
 
+\begin{frame}
+  \frametitle{}
+  \framesubtitle{}
+\end{frame}
+
 %==========================================================
 
-\section{Conclusion}
+\section{Conclusion et perspectives}
 
+\begin{frame}
+  \frametitle{}
+  \framesubtitle{}
+\end{frame}
 
 
 \end{document}
