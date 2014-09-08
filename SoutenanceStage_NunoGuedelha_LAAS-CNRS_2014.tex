@@ -1,4 +1,4 @@
-\documentclass[11pt]{beamer}
+\documentclass[10pt]{beamer}
 %\usetheme{Amsterdam}
 \usetheme{Darmstadt}
 %\usecolortheme{beaver}
@@ -325,12 +325,12 @@
   
 \end{frame}
 
-\begin{frame}
+\begin{frame}\small
 
   \frametitle{Quatre étapes de résolution...}
   
   % affichage au coin droit supérieur des équations de référence
-  \begin{columns}[t]
+  \begin{columns}[T]
   \begin{column}{.6\textwidth}
     equ.\eqref{equ_equationMvt_dynHyb2} Se décline en 2 lignes... \bigskip \\
     \begin{enumerate}
@@ -342,7 +342,7 @@
     \end{enumerate}
   \end{column}
   \begin{column}{.37\textwidth}
-  	\begin{block}{équations de mouvement reformulées:}\tiny
+  	\begin{block}{\footnotesize{équations de mouvement reformulées:}}\tiny
 	  \begin{align*}
 	  	\begin{bmatrix}
 		  H_{11} & H_{12} \\
@@ -387,132 +387,425 @@
 	\end{block}
   \end{column}
   \end{columns}
+  \vfill
 
 \end{frame}
-
-%\begin{frame}
-%  \frametitle{Calcul des coefficients...}
-%  
-%(garder au coin haut supérieur les 2 équations de mouvement)
-%
-%Calcul de $C'$: 
-%\begin{align*}
-%\textnormal{Pour} \quad \ddot{q}=
-%\begin{bmatrix}
-%  0 \\
-%  \ddot{q}_2
-%\end{bmatrix}
-%: 
-%&\left{
-%\eqref{equ_equationMvt_dynHyb2}
-%\iff
-%\begin{bmatrix}
-%  C'_1 \\
-%  C'_2
-%\end{bmatrix}
-%=
-%\begin{bmatrix}
-%  \tau_1 \\
-%  \tau_2
-%\end{bmatrix} \\
-%\eqref{equ_equationMvt_dynHyb1}
-%\iff
-%\begin{bmatrix}
-%  C'_1 \\
-%  C'_2
-%\end{bmatrix}
-%=
-%Q \mathrm{ID} \left( q,\dot{q},Q^T
-%\begin{bmatrix}
-%  0 \\
-%  \ddot{q}_2
-%\end{bmatrix} \right)
-%\right.
-%\iff
-%&\begin{bmatrix}
-%  C'_1 \\
-%  C'_2
-%\end{bmatrix}
-%=
-%Q \mathrm{ID} \left( q,\dot{q},Q^T
-%\begin{bmatrix}
-%  0 \\
-%  \ddot{q}_2
-%\end{bmatrix} \right)
-%\end{align*}
-%
-%Calcul de $H_{11}$ sous-matrice de $H$
-%  - calcul de $H = \mathrm{CRBA}(modèle,q)$
-%  - permutation $H' = Q H Q^T$
-%  - sélection de $H_{11}$ (méthode d'accès par blocs de la classe \verb;Eigen::Matrix; => \verb;H'.block<n_{fd},n_{fd};)
-%
-%\end{frame}
-%
-%\begin{frame}
-%  \frametitle{Résolution des équations...}
-%  
-%Résoudre $\ddot{q}_1$ \\
-%  Système linéaire: $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
-%  Inversion de $H$ trop coûteuse (complexité $O(n^3)$ (où n est la dimension de $H$)
-%  => décomposition de $H$
-%  
-%Choix de la décomposition:
-%  $H$ et $H_{11}$ symétriques, définies positives 
-%  [tableau avec complexité des diff. méthodes]
-%\setlength{\intextsep}{0pt}
-%\setlength{\columnsep}{0cm}
-%\begin{wraptable}[7]{r}{0.45\textwidth}\raggedleft
-%\begin{tabular}[H]{|l|c|}
-%\hline
-%Décomposition ou méthode & Complexité $O$ \\ \hline \hline
-%inversion directe de matrice & $O(n^3)$ \\ \hline
-%LLT et LDLT & $O(n^3/3)$ \\ \hline
-%LU & $O(2n^3/3)$ \\ \hline
-%QR & $O(4n^3/3)$ \\
-%\hline
-%\end{tabular}
-%\end{wraptable}
-%  => factorisation LDL^T (robuste, rapide, la plus appropriée):
-%  $H_{11} = L D L^T$
-%  ($D$ matrice diagonale,
-%   $L$ matrice triangulaire inférieure et $\forall i: L_{ii}=1$)
-%  Solveur \verb;Eigen::LDLT;
-%
-%Calcul de $\tau_2$:
-%  Sélection de $H_{21}$ dans  $H'$
-%  $\tau_2 = C'_2 + H_{21} \ddot{q}_1$
-%
-%\end{frame}
-%
-%\begin{frame}
-%  \frametitle{Algorithme complet:}
-%  
-%  <algo 3.1.1>
-%  
-%\end{frame}
-%==========================================================
 
 \begin{frame}
-  \frametitle{}
-  \framesubtitle{}
-\end{frame}
-%==========================================================
+  \frametitle{Calcul des coefficients...}
+  
+  	\begin{block}{\footnotesize{équations de mouvement reformulées:}}\tiny
+  	\setlength\abovedisplayskip{0pt}
+  	\setlength\belowdisplayskip{0pt}
+  \begin{align*}
+  	\begin{bmatrix}
+	  H_{11} & H_{12} \\
+	  H_{21} & H_{22}
+	\end{bmatrix} 
+	\cdot
+	\begin{bmatrix}
+	  \ddot{q}_{1} \\
+	  \ddot{q}_{2}
+	\end{bmatrix} 
+	= 
+	\begin{bmatrix}
+	  \tau_{1} \\
+	  \tau_{2}
+	\end{bmatrix} 
+	-
+	\begin{bmatrix}
+	  C_{1} \\
+	  C_{2}
+	\end{bmatrix} \quad \eqref{equ_local_eqMvt_2} \hspace{2cm}
+	\begin{bmatrix}
+	  H_{11} & 0 \\
+	  H_{21} &  -I
+	\end{bmatrix} 
+	\cdot
+	\begin{bmatrix}
+	  \ddot{q}_1 \\
+	  \tau_2
+	\end{bmatrix} 
+	=
+	\begin{bmatrix}
+	  \tau_1 \\
+	  0
+	\end{bmatrix} 
+	-
+	\begin{bmatrix}
+	  C'_{1} \\
+	  C'_{2}
+	\end{bmatrix} \quad \eqref{equ_equationMvt_dynHyb2} \\
+	\end{align*}
+  \end{block}
+  
+	Calcul de $C'$: 
+	\begin{columns}[onlytextwidth]
+	\begin{column}[c]{0.8\textwidth}\scriptsize
+	\begin{align*}
+	\left. \textnormal{Pour} \quad \ddot{q}=
+	\begin{bmatrix}
+	  0 \\
+	  \ddot{q}_2
+	\end{bmatrix}
+	: 
+	\begin{cases}
+	\eqref{equ_equationMvt_dynHyb2}
+	\implies
+	\begin{bmatrix}
+	  C'_1 \\
+	  C'_2
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+	  \tau_1 \\
+	  \tau_2
+	\end{bmatrix} \\
+	& \\
+	\eqref{equ_local_eqMvt_2}
+	\implies
+	\begin{bmatrix}
+	  \tau_1 \\
+	  \tau_2
+	\end{bmatrix}
+	=
+	Q \cdot \mathrm{ID} \left( q,\dot{q},Q^T
+	\begin{bmatrix}
+	  0 \\
+	  \ddot{q}_2
+	\end{bmatrix} \right)
+	\end{cases} \right]
+	\iff
+	\end{align*}
+	\end{column}
+	\begin{column}[c]{0.27\textwidth}\tiny
+	\begin{block}{}
+	\begin{spacing}{1.5}
+	$\begin{bmatrix}
+	  C'_1 \\
+	  C'_2
+	\end{bmatrix}
+	=
+	Q \cdot \mathrm{ID} \left( q,\dot{q},Q^T
+	\begin{bmatrix}
+	  0 \\
+	  \ddot{q}_2
+	\end{bmatrix} \right)$
+	\end{spacing}
+	\end{block}
+	\end{column}
+	\end{columns}
+  
+  \bigskip
+	Calcul de $H_{11}$, sous-matrice de $H$:
+	\begin{itemize}
+	\item calcul de $H = \mathrm{CRBA}(modèle,q)$
+	\item permutation $H' = Q H Q^T$
+	\item sélection de $H_{11}$ (méthode d'accès par blocs de la classe \verb;Eigen::Matrix; $\longrightarrow$ \verb;H'.block<$n_{fd}$,$n_{fd}$>;)
+	\end{itemize}
 
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Résolution des équations...}
+  
+  \begin{columns}[T]
+	\begin{column}{0.5\textwidth}
+		Résoudre $\ddot{q}_1$:
+		\begin{itemize}
+		\item Système linéaire: $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
+		\item Inversion de $H$ trop coûteuse \\
+		      (complexité $O(n^3)$ \\
+		      $\hookrightarrow$  décompoer de $H$
+		\end{itemize}
+  \end{column}
+	\begin{column}{0.5\textwidth}\scriptsize
+		\begin{tabular}[H]{|l|c|}
+		\hline
+		Décomposition ou méthode & Complexité $O$ \\ \hline \hline
+		inversion directe de matrice & $O(n^3)$ \\ \hline
+		LLT et LDLT & $O(n^3/3)$ \\ \hline
+		LU & $O(2n^3/3)$ \\ \hline
+		QR & $O(4n^3/3)$ \\
+		\hline
+		\end{tabular}
+	\end{column}
+	\end{columns}
+
+  \bigskip
+  
+  \begin{columns}[T]
+	\begin{column}{0.55\textwidth}
+		Critères de choix de la décomposition: propriétés de $H_{11}$ et complexité de la décomposition:
+		\begin{itemize}
+		\item $H$ et $H_{11}$ symétriques, définies positives 
+		\item factorisation $LDL^T$ et $LL^T$ sont applicables
+		\item $\hookrightarrow$ factorisation $LDL^T$ (robuste, rapide, la plus appropriée)
+		\end{itemize}
+  \end{column}
+	\begin{column}{0.45\textwidth}
+	  \begin{alertblock}{décomposition de $H_{11}$}
+    $H_{11} = L D L^T$
+    \begin{itemize}
+	    \item $D \longrightarrow$ diagonale
+	    \item $L \longrightarrow$ triangulaire inférieure \\
+	                              $\forall i: L_{ii}=1$)
+	    \item Solveur \verb;Eigen::LDLT;
+	  \end{itemize}
+    \end{alertblock}
+	\end{column}
+	\end{columns} \vfill
+
+	\framebreak
+	
+	Calcul de $\tau_2$:
+	\begin{itemize}
+	\item Sélection de $H_{21}$ dans  $H'$
+	\item $\tau_2 = C'_2 + H_{21} \ddot{q}_1$
+	\end{itemize} \vfill
+	
+\end{frame}
+	
 \begin{frame}
-  \frametitle{}
-  \framesubtitle{}
+	\frametitle{Algorithme complet:}
+	  
+	\begin{spacing}{1.5}
+	\begin{columns}[T]\scriptsize
+%	\setlength{\columnsep}{10pt}
+%	\setlength{\columnseprule}{0.5pt}
+	\begin{column}{.48\textwidth}
+	\begin{pseudocode}{hybridDynamics}{model, q, \dot{q}, \ddot{q}, \tau}
+	(1)
+	\BEGIN
+	  \textnormal{\# Calul de $C'$, $C'_1$ et $C'_2$} \\
+	  \ddot{q}_{perm} \GETS Q \ddot{q} \\
+	  (\ddot{q}_{perm})_{i \in [1,fd]} \GETS 0 \\
+	  \ddot{q}_2 \GETS (\ddot{q}_{perm})_{i \in [fd+1,n_{dof}]} \\
+	  \ddot{q} \GETS Q^T \ddot{q}_{perm} \\
+	  model.torques \GETS rnea(model,q,\dot{q},\ddot{q}) \\
+	  C' \GETS getTorques(model) \\
+	  C'_{perm} \GETS Q C'\\
+	  C'_1 \GETS (C'_{perm})_{i \in [1,fd]} \\
+	  C'_2 \GETS (C'_{perm})_{i \in [fd+1,n_{dof}]}
+	\END \\
+	(2)
+	\BEGIN
+	  \textnormal{\# Calcul de $H_{11}$} \\
+	  model.H \GETS crba(model,q) \\
+	  H_{perm} \GETS Q model.H Q^T \\
+	  H_{11} \GETS (H_{perm})_{i,j \in [1,fd]} 
+	\END 
+	\end{pseudocode}
+	\end{column}
+	\begin{column}{.48\textwidth}
+	\begin{pseudocode}{ }{ }
+	(3) 
+	\BEGIN
+	  \textnormal{\# Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$} \\
+	  \tau_{perm} \GETS Q \tau \\
+	  \tau_1 \GETS (\tau_{perm})_{i \in [1,fd]} \\
+	  \tau_2 \GETS (\tau_{perm})_{i \in [fd+1,n_{dof}]} \\
+	  b \GETS \tau_1 - C'_1 \\
+	  A \GETS H_{11} \\
+	  lltOfH11 \GETS LLT(A) \hfill \textnormal{\# création du solveur} \\
+	  \ddot{q}_1 \GETS lltOfH11.solve(b) \hfill \textnormal{\# résolution} 
+	\END \\
+	(4) 
+	\BEGIN
+	  \textnormal{\# Calcul de $\tau_2$ et reconstruction des vecteurs de} \\
+	  \textnormal{\# sortie $\ddot{q}$ et $\tau$} \\
+	   H_{21} \GETS (QHQ^T)_{n_{fd+1} \leqslant i \leqslant n_{dof},1 \leqslant j \leqslant n_{fd}} \\
+	  \tau_2 \GETS C'_2 + H_{21} \ddot{q}_1 \\
+	  \tau \GETS Q^T \begin{bmatrix} \tau_1 & \tau_2 \end{bmatrix}^T \\
+	  \ddot{q} \GETS Q^T \begin{bmatrix} \ddot{q}_1 & \ddot{q}_2 \end{bmatrix}^T
+	\END 
+	\end{pseudocode}
+	\end{column}
+	\end{columns}
+	\end{spacing}
+  \vfill
+	  
 \end{frame}
+
 %==========================================================
 
-\begin{frame}
-  \frametitle{}
-  \framesubtitle{}
-\end{frame}
-%==========================================================
-
-%==========================================================
 
 \subsection{Optimisations}
+
+\begin{frame}
+  \frametitle{Optimisation du CRBA et des transformations $^sX_p$}
+  
+  \begin{block}{Correction du calcul optimal de $^sXp$}
+  \begin{itemize}
+	  \item rotations $X_J$: axe parallèle à $Ox$ ou $Oy$ ou $Oz$ du repère lié au corps par $X^T$
+	  \item $\hookrightarrow$ calcul des transformations $^sXp$ dans \verb;jcalc;
+	  \item $\hookrightarrow$ calcul des vitesses et accélérations composées dans \verb;jcalc;.
+  \end{itemize}
+  \end{block}
+  
+  \begin{block}{Calcul de $H$ limité aux coefficients de $H_{11}$ (Hybrid CRBA)}
+  \begin{itemize}
+    \item Calcul de $H$ complet: $\forall noeud_i$ sauf la base, calcul de $H_{ij}$ ($j$ = noeud sélectionné en remontant l'arbre vers la racine)
+	  \item Optimisation $H_{11}$: parcours de $\nu(fd)$, et $H_{ij}$ calculés pour $i,j \in fd$
+	  \item Optimisation $H_{11}$ + $H_{21}$: parcours étendu au reste de l'arbre si $i \in fd$
+  \end{itemize}
+	\end{block}    
+  
+\end{frame}
+
+\setmyFiguresFile{optimisations}
+
+\begin{frame}
+  \frametitle{Définitions...}
+  
+  	\begin{columns}
+	\begin{column}{.48\textwidth}
+  \dispFig[T!]{3}{\textwidth}{calcul de $H_{ij}$}{chdaCalculHij} \vfill
+  \end{column}
+  \begin{column}{.48\textwidth}
+  \vfill \dispFig[B!]{2}{.8\textwidth}{Inertie composite ${I_i}^c$}{chdaCalculIic}
+  \end{column}
+  \end{columns}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Quelques exemples pour le CRBA optimisé (Hybrid CRBA)}
+  
+	\begin{figure}[H]
+	  \begin{center}
+%   \begin{overprint}
+	  \includegraphics[width=\textwidth, page=4]{figs/\myFiguresFile}
+	  \caption{Calcul de $H$ complet}
+	  \includegraphics[width=.9\textwidth, page=6]{figs/\myFiguresFile}
+	  \caption{Optimisation $H_{11}$}
+%   	\end{overprint}
+	  \end{center}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}
+	\begin{figure}[H]
+	  \begin{center}
+	  \includegraphics[width=.9\textwidth, page=6]{figs/\myFiguresFile}
+	  \caption{Optimisation $H_{11}$}
+	  \includegraphics[width=.9\textwidth, page=7]{figs/\myFiguresFile}
+	  \caption{Optimisation $H_{11}$ + $H_{21}$}
+	  \end{center}
+	\end{figure}
+	
+\end{frame}
+
+\begin{frame}
+  \frametitle{Réduction des dépendances et calcul optimal de $\tau_2$}
+
+  Dynamique Inverse Différentielle pour le calcul de $\tau$:
+	\begin{equation}\footnotesize
+	\tau = \bsy{C'} + \mathrm{ID}_{\delta} \left( Q^T \bsy{\begin{bmatrix} 
+	                                                         \ddot{q}_1 \\
+	                                                         0 
+	                                                       \end{bmatrix}} \right) \label{equ_tauIDdiff_2}
+	=
+	\bsy{C'} + \mathrm{ID} \left( \bsy{q,\dot{q}},Q^T \bsy{\begin{bmatrix}
+	                                                         \ddot{q}_1 \\      
+	                                                          0         
+	                                                       \end{bmatrix}} \right) - Q \: \mathrm{ID}(\bsy{q,\dot{q},0})
+	\end{equation}
+	
+	\bigskip
+	
+	\begin{itemize}
+	\item[$\hookrightarrow$] simplification des termes en $\bsy{q, \dot{q}}$ (RNEA simplifié)
+	\item[$\hookrightarrow$] abandon de $H_{21}$ (HCRBA accéléré)
+	\end{itemize}
+  
+\end{frame}
+
+\begin{frame}\scriptsize
+  \frametitle{Résultats: mesure de durée d'exécution}
+
+  \note{Mesure des temps d'exécutions relatifs à un RNEA classique
+        Mesures du temps d'exécution de chacune des étapes (a -> e) de l'algorithme (4 + reconstruction des vecteurs)
+        Comparaison des optimisations (1 -> 4)}
+  Optimisations:
+	\begin{enumerate}
+	\item matrices de passage à axes fixes prédéfinis
+	\item HCRBA(CRBA hybride) $H_{11}-H_{12}-H_{21}$
+	\item utilisation du module \emph{Eigen} de Sparsité
+	\item HCRBA $H_{11}$ seule + Dynamique Inverse différenciel ($ID_\delta$), sans la sparsité \emph{Eigen}
+	\end{enumerate}
+	
+	\note{les optimisations sont cumulées dans l'ordre de numérotation. Voici l'ensemble des mesures réalisées sur notre modèle de robot humanoïde}
+	
+	\begin{flushleft}
+	
+	\begin{table}[H]
+	\begin{center}
+	\begin{tabular}[H]{|l|l|}
+	\hline
+	Nom du CPU & Intel(R) Core(TM) i7-4700HQ CPU \\ \hline \hline
+	Fréquence & 2.40GHz \\ \hline
+	Fréquence bus CPU & 800 MHz \\ \hline
+	Nombre de coeurs & 8(4) \\ \hline
+	Taille du cache & 6144 Kb \\ \hline
+	Distribution & Ubuntu 14.04 LTS (trusty) \\
+	\hline
+	\end{tabular}
+	\caption[Table caption text]{Propriétés du processeur de la plateforme de test}
+	\label{table:propriétésProc}
+	\end{center}
+	\end{table}
+	
+	\end{flushleft}
+	
+\end{frame}
+
+\begin{frame}\scriptsize
+  
+	\begin{flushleft}
+  
+	\begin{table}[H]
+	\begin{center}
+	\begin{tabular}[H]{|l|l|l|}
+	\hline
+	Version d'implémentation                   & implémentation initiale    & (1)      \\ \hline \hline
+	Durée moyenne                              & 16.286723                  & 14.07054 \\
+	a: RNEA                                    & 6.39608                    & 5.46801  \\
+	b: CRBA                                    & 7.59427                    & 6.31883  \\
+	c: $\ddot{q}_1$ (solver)                   & 0.894731                   & 0.872069 \\
+	d: $\tau_2$                                & 0.730014                   & 0.734224 \\
+	e: reconstruction de $\tau$ et $\ddot{q}$  & 0.671628                   & 0.677407 \\
+	\hline
+	\end{tabular}
+	\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: optimisation liée aux repères à axes fixes.}
+	\label{table:performancesOptimAxesFixes}
+	\end{center}
+	\end{table}
+	
+	\begin{table}[H]
+	\begin{center}
+	\begin{tabular}[H]{|l|l|l|l|l|l|l|l|l|}
+	\hline
+	Version d'implémentation                   & \multicolumn{2}{c|}{(1)}  & \multicolumn{2}{c|}{(2)} & \multicolumn{2}{c|}{(3)} & \multicolumn{2}{c|}{(4)} \\ \hline \hline
+	                                           & $\mu s$      & (\%)      & $\mu s$     & (\%)   & $\mu s$     & (\%)   & $\mu s$   & (\%) \\ \hline
+	Durée moyenne                              & 14.07054     & 2.57      & 11.118823   & 2.16   & 11.626056   & 2.16   & 10.968547 & 2.02 \\
+	a: RNEA                                    & 5.46801      & 1         & 5.14257     & 1      & 5.38397     & 1      & 5.42778   & 1    \\
+	b: CRBA                                    & 6.31883      & 1.16      & 3.66517     & 0.71   & 3.61689     & 0.67   & 2.3934    & 0.44 \\
+	c: $\ddot{q}_1$ (solver)                   & 0.872069     & 0.16      & 0.889762    & 0.17   & 1.21743     & 0.23   & 0.886647  & 0.16 \\
+	d: $\tau_2$                                & 0.734224     & 0.13      & 0.738075    & 0.14   & 0.731042    & 0.14   & 2.26072   & 0.42 \\
+	e: reconstruction de $\tau$ et $\ddot{q}$  & 0.677407     & 0.12      & 0.683246    & 0.13   & 0.676724    & 0.13   & 0         & 0    \\
+	\hline
+	\end{tabular}
+	\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: les optimisationsspécifiques au CHDA. On a reporté, pour chacune d'elles le gain relatif par rapport à un traitement de référence qui est l'étape 1 (RNEA classique).}
+	\label{table:performancesOptimSpecifCHDA}
+	\end{center}
+	\end{table}
+	
+	\end{flushleft}
+	
+	
+\end{frame}
 
 %==========================================================
 \section{Méthodes}
@@ -521,7 +814,24 @@
 
 \begin{frame}
   \frametitle{}
-  \framesubtitle{}
+  
+  \setmyFiguresFile{cycleDev}
+  \dispFig[H]{1}{.8\textwidth}{Cycle de développement}{}
+  
+\end{frame}
+
+\begin{frame}
+
+  tests unitaires et Validation:
+  \begin{itemize}
+		\item exécution pas à pas des fonctions créées (gdb, qtcreator)
+		\item validation de résultats d'algorithmes: traitements alternatifs (HCRBA, RNEA/CRBA)
+		\item Méta fonctions: comparaison phase compilation vs exécution
+		\item Matrice de permutation: vérification fonctionnelle et des propriétés 
+		\item Génération aléatoire de vecteurs de test $q$, $\dot{q}$, $\ddot{q}$, $\tau$
+		\item Mesures de temps d'exécution sur 100000 itérations
+  \end{itemize}
+
 \end{frame}
 
 %==========================================================
@@ -530,7 +840,19 @@
 
 \begin{frame}
   \frametitle{}
-  \framesubtitle{}
+  Langages et outils de développement:
+  \begin{itemize}
+  \item template C++ et Méta programmation
+  \item BOOST : méthode de test $\curvearrowright$ suite de tests unitaires \emph{metapo} \\
+                création aisée de tableaux de types ou d'objets templatés
+  \item Eigen
+  \item cmake
+  \end{itemize}
+  
+  \bigskip
+  Outils d'édition, analyse et gestion de configuration:\\
+  emacs, Qtcreator, gdb, github, git, gitk, cachegrind
+    
 \end{frame}
 
 %==========================================================
@@ -539,7 +861,9 @@
 
 \begin{frame}
   \frametitle{}
-  \framesubtitle{}
+  
+  \huge{CONCLUSION}
+  
 \end{frame}
 
 
