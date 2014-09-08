@@ -121,15 +121,82 @@
 
 \begin{frame}
   \frametitle{Objectifs}
-  \framesubtitle{}
+  
+	Implémenter un algorithme de dynamique hybride dans la librairie metapod:
+	\begin{itemize}
+		\item algorithme optimisé décrit par Roy Featherstone (“Rigid Body Dynamics Algorithm",2008)
+\note{Roy Featherstone: Chercheur spécialisé en modélisation dynamique de robots. Ph.D. à Edinburgh -> univ Australian National -> Professeur invité à l'IIT}
+		\item Formalisme de Newton-Euler, Algèbre Spatiale (mécanique des torseurs),
+\note{vs formalisme Lagrange: effort généralisé sur chaque articulation en termes d'NRJ}
+		\item metapod, l'algèbre spatiale, C++ template méta-programmation
+  \end{itemize}
+  	Analyser et appliquer les optimisations de Featherstone, combiner à Eigen:
+  	\begin{itemize}
+		\item Eigen, librairie templatée
+		\item optimisations spécifiques à algo dyn hybride (réduire dimension du système à résoudre)
+		\item optimisation branch sparsity (structure creuse de la matrice d'inertie H)
+  \end{itemize}
+		
+  Réflexion sur l'application de la Dynamique Hybride
+  	\begin{itemize}
+		\item modélisation d'articulation flexibles ("compliant")
+		\item commande de robot ayant une base flottante
+  \end{itemize}
+	
 \end{frame}
 %==========================================================
 
 \section{Modélisation Dynamique}
 
-\begin{frame}
+\begin{frame}[allowframebreaks]
   \frametitle{}
-  \framesubtitle{}
+  
+  Indispensable dans certains cas:
+  	\begin{itemize}
+  	\item robot articulé, membres à l'inertie non négligeable
+  	\item robot sans base fixe ou roulante (garantir l'appui au sol et l'équilibre)
+  	\end{itemize}
+  	
+  On traite dans cet exposé: arbres cinématiques, pas les boucles
+  
+  Comment poser le problème dynamique. Equation de mouvement (notations):
+  	\begin{description}
+	  \item[$model$ :] le modèle dynamique du système à multi-corps rigides
+	  \item[$q, \dot{q}, \ddot{q}$ :] vecteurs de position, vitesse, accélération des articulations du système
+	  \item[$\tau$ :] forces/couples moteurs (internes) appliqués aux articulations
+	  \item[$f^{ext}$ :] forces de contrainte extérieures (force de gravitation, coriolis, forces de contact, ...)
+	\end{description}
+	
+	Les 3 types de problème dynamique:
+  \begin{itemize}
+  	\item dynamique directe $\longrightarrow$ trouver les accélérations induites par les forces appliquées aux articulations \\
+	      Application: simulation \\
+				\begin{equation}
+				\ddot{q} = \mathrm{FD}(model,\bsy{q,\dot{q},\tau})
+				\end{equation}
+  \item dynamique inverse $\longrightarrow$ trouver les forces à appliquer aux accélérations pour produire les articulations voulues \\
+	      Application:  contrôle, composante de dynamique directe ou inverse. \\
+	      Utilité du calcul des couples actionneurs robot humanoïde: \\
+        \begin{itemize}
+        \item commande en couple ou
+        \item estimation du centre de pression $\longrightarrow$ injecté dans le PC (preview control) $\longrightarrow$ générer trajectoire CoM
+        \end{itemize}
+				\begin{equation}
+				\mathbf{\tau} = \mathrm{ID}(model,\bsy{q,\dot{q},\ddot{q}})
+				\end{equation}
+  \item dynamique hybride $\longrightarrow$ généralisation de de la dynamique directe et inverse \\
+\note{pour chaque articulation, on connaît soit le couple (art. $fd$) soit l'accélération (art. $id$). L'algo calcule toutes les inconnues ($fd$ $\longrightarrow$ FD, $id$ $\longrightarrow$ ID)}
+        Applications: simulation avec contraintes suppl sur une art. (excitation) \\
+                    simulation simplifiée (certaines accélérations connues) \\
+                    modéliser système à articulations flexibles \\
+                    robot sans base fixe (la base flottante est l'articulation $fd$, couple appliqué est connu et nul, l'algo donne son accélération
+%\note{Pourrait améliorer l'estimation de la position du centre de pression (ZMP) => utilisé par le filtre dynamique pour corriger la trajectoire du CoM du robot humanoïde
+%                    $q,\dot{q},\ddot{q} = \mathrm{IK}(modele_ponctuel, c, \dot{c}, \ddot{c}, X^f)$
+%                    $f,\tau = \mathrm{ID}(modele_complet,q,\dot{q},\ddot{q})$ $\longrightarrow CoP^MB$
+%                    $\delta CoM = PreviewControl(\delta CoP) de Kajita$}
+  	\end{itemize}
+    
+
 \end{frame}
 
 %==========================================================
@@ -138,7 +205,35 @@
 
 \begin{frame}
   \frametitle{}
-  \framesubtitle{}
+
+%On se base sur le cahier des charges de l'RNEA utilisé dans le filtrage dynamique du CoM
+%--> [cube de contraintes]
+%    - période d'échantillonnage 5ms (1 commande vectorielle $\mathbf{q}$ de 30 DOF) -> $1ms$ pour les calculs de dynamique
+%    - fenêtre de filtrage dynamique 1.6s => 32 RNEA
+%    => 1 RNEA en $30\mu s$
+%    <v> ~ $4\mu s$ sur i7-4700HQ, ~ $15\mu s$ sur HRP2 Core2(TM) Duo E7500
+%
+%--> précision numérique 0.1%
+%
+%- Algèbre Spatiale et méta programmation
+%
+%  - basée sur les torseurs (avec différence de notation), réduit la compléxité de la modélisation dynamique, comb. translation/rotation
+%    (composition simplifiée des vitesses et accélérations)
+%  - Algos CRBA et RNEA exploitent la récursivité (\emph{pattern} Visiteur), la "sparsité" / abscesnce de couplage entre branches cinématiques
+%  - méta prog. => propriétés d'un langage symbolique (calculs inutiles non exécutés)
+%  - méta fonctions génèrent des traitements/calculs numériques à la compilation
+%    (conditions méta fonction: params->types ou int statiques et constants)
+%
+%- Architecture de la librairie \emph{metapod}
+%
+%%<Schéma global figure 1.1 p12>
+%
+%\emph{metapo} fournit algos basés sur modèle dynamique général
+%prend un modèle $M$ spécifique (header)
+%génère du code optimisé spécifique au modèle $M$
+%
+%%<schéma fonctionnel interne de metapod>
+
 \end{frame}
 
 %==========================================================

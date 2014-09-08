@@ -1,5 +1,7 @@
 Plan...
 
+%========================================= intégré ==================================================================
+
 - Contexte stage
       Projet professionnel
       Le LAAS et Gepetto (activité intégration outils modélisation / simulation
@@ -22,7 +24,7 @@ Plan...
       =>  modélisation d'articulation flexibles ("compliant")
       =>  commande de robot ayant une base flottante
 
-%====================================================================================================================
+%======================================= intégré ====================================================================
 
 - La Modélisation Dynamique. 
 
