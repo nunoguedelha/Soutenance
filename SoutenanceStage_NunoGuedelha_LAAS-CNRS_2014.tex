@@ -123,24 +123,22 @@
 \begin{frame}
   \frametitle{Objectifs}
   
-	Implémenter un algorithme de dynamique hybride dans la librairie metapod:
+  \begin{block}{Implémentation d'un algorithme de dynamique hybride dans metapod:}
 	\begin{itemize}
-		\item algorithme optimisé décrit par Roy Featherstone (“Rigid Body Dynamics Algorithm",2008)
-\note{Roy Featherstone: Chercheur spécialisé en modélisation dynamique de robots. Ph.D. à Edinburgh -> univ Australian National -> Professeur invité à l'IIT}
-		\item Formalisme de Newton-Euler, Algèbre Spatiale (mécanique des torseurs),
+		\item formalisme de Newton-Euler, Algèbre Spatiale
 \note{vs formalisme Lagrange: effort généralisé sur chaque articulation en termes d'NRJ}
-		\item metapod, l'algèbre spatiale, C++ template méta-programmation
+		\item algorithmes et optimisation de Roy Featherstone
+\note{Roy Featherstone: (“Rigid Body Dynamics Algorithm",2008) Chercheur spécialisé en modélisation dynamique de robots. Ph.D. à Edinburgh -> univ Australian National -> Professeur invité à l'IIT}
+		\item C++ template méta-programmation
+		\item combiner à Eigen \note{librairie templatée}
+		\item benchmarking
   \end{itemize}
-  	Analyser et appliquer les optimisations de Featherstone, combiner à Eigen:
+  \end{block}
+	
+	\bigskip
+  Réflexion sur l'application de la Dynamique Hybride:
   	\begin{itemize}
-		\item Eigen, librairie templatée
-		\item optimisations spécifiques à algo dyn hybride (réduire dimension du système à résoudre)
-		\item optimisation branch sparsity (structure creuse de la matrice d'inertie H)
-  \end{itemize}
-		
-  Réflexion sur l'application de la Dynamique Hybride
-  	\begin{itemize}
-		\item modélisation d'articulation flexibles ("compliant")
+		\item modélisation d'articulations flexibles ("compliant")
 		\item commande de robot ayant une base flottante
   \end{itemize}
 	
@@ -150,56 +148,76 @@
 \section{Modélisation Dynamique}
 
 \begin{frame}[allowframebreaks]
-  \frametitle{}
+  \frametitle{Cas d'utilisation}
   
-  Indispensable dans certains cas:
-  	\begin{itemize}
-  	\item robot articulé, membres à l'inertie non négligeable
-  	\item robot sans base fixe ou roulante (garantir l'appui au sol et l'équilibre)
-  	\end{itemize}
-  	
-  On traite dans cet exposé: arbres cinématiques, pas les boucles
+  Indispensable $\begin{cases}  \text{compenser l'inertie des membres} \\ 
+                                \text{garantir l'appui au sol} \end{cases}$ \note{robot sans base fixe} \\
   
-  Comment poser le problème dynamique. Equation de mouvement (notations):
+  \bigskip
+  Composantes de l'équation de mouvement:
   	\begin{description}
 	  \item[$model$ :] le modèle dynamique du système à multi-corps rigides
-	  \item[$q, \dot{q}, \ddot{q}$ :] vecteurs de position, vitesse, accélération des articulations du système
-	  \item[$\tau$ :] forces/couples moteurs (internes) appliqués aux articulations
-	  \item[$f^{ext}$ :] forces de contrainte extérieures (force de gravitation, coriolis, forces de contact, ...)
+	  \item[$\bsy{q, \dot{q}, \ddot{q}}$ :] vecteurs de position, vitesse, accélération des articulations du système
+	  \item[$\bsy{\tau}$ :] forces/couples moteurs (internes) appliqués aux articulations
+	  \item[$\bsy{f^{ext}}$ :] forces de contrainte extérieures (force de gravitation, coriolis, forces de contact, ...)
 	\end{description}
 	
-	Les 3 types de problème dynamique:
-  \begin{itemize}
-  	\item dynamique directe $\longrightarrow$ trouver les accélérations induites par les forces appliquées aux articulations \\
-	      Application: simulation \\
-				\begin{equation}
-				\ddot{q} = \mathrm{FD}(model,\bsy{q,\dot{q},\tau})
-				\end{equation}
-  \item dynamique inverse $\longrightarrow$ trouver les forces à appliquer aux accélérations pour produire les articulations voulues \\
-	      Application:  contrôle, composante de dynamique directe ou inverse. \\
-	      Utilité du calcul des couples actionneurs robot humanoïde: \\
-        \begin{itemize}
-        \item commande en couple ou
-        \item estimation du centre de pression $\longrightarrow$ injecté dans le PC (preview control) $\longrightarrow$ générer trajectoire CoM
-        \end{itemize}
-				\begin{equation}
-				\mathbf{\tau} = \mathrm{ID}(model,\bsy{q,\dot{q},\ddot{q}})
-				\end{equation}
-  \item dynamique hybride $\longrightarrow$ généralisation de de la dynamique directe et inverse \\
-\note{pour chaque articulation, on connaît soit le couple (art. $fd$) soit l'accélération (art. $id$). L'algo calcule toutes les inconnues ($fd$ $\longrightarrow$ FD, $id$ $\longrightarrow$ ID)}
-        Applications: simulation avec contraintes suppl sur une art. (excitation) \\
-                    simulation simplifiée (certaines accélérations connues) \\
-                    modéliser système à articulations flexibles \\
-                    robot sans base fixe (la base flottante est l'articulation $fd$, couple appliqué est connu et nul, l'algo donne son accélération
-\note{Pourrait améliorer l'estimation de la position du centre de pression (ZMP) $\longrightarrow$ utilisé par le filtre dynamique pour corriger la trajectoire du CoM du robot humanoïde:
-\begin{align}
-  q,\dot{q},\ddot{q} = \mathrm{IK}(modele_ponctuel, c, \dot{c}, \ddot{c}, X^f)
-  f,\tau = \mathrm{ID}(modele_complet,q,\dot{q},\ddot{q}) \longrightarrow CoP^MB
-  \delta CoM = PreviewControl(\delta CoP) de Kajita
-\end{align}}
-  	\end{itemize}
-    
+	\framebreak
 
+  \setmyFiguresFile{hrp2Control}
+	
+	3 types de problèmes dynamiques et applications:
+	\begin{figure}[T]
+	\begin{columns}[T]
+	  \begin{column}{.48\textwidth}
+		  \begin{itemize}
+		  	\item dynamique directe \\
+		  	      $\rightarrow$ \href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}	{\textcolor{blue}{simulation}}:
+		  	      \note{trouver les accélérations induites par les forces appliquées aux articulations}
+						\begin{equation}
+						\ddot{q} = \mathrm{FD}(model,\bsy{q,\dot{q},\tau})
+						\end{equation}
+		  \item 	dynamique inverse \\
+		        $\rightarrow$ contrôle du \emph{CoM} (compense l'inertie des bras):
+		        \note{trouver les forces à appliquer aux accélérations pour produire les articulations voulues. Estimation du centre de pression $\longrightarrow$ injecté dans le PC (preview control) $\longrightarrow$ générer trajectoire CoM}
+						\begin{equation}
+						\bsy{\tau} = \mathrm{ID}(model,\bsy{q,\dot{q},\ddot{q}})
+						\end{equation}
+			\end{itemize}
+		\end{column}
+		\begin{column}{.48\textwidth}
+		  \begin{center}
+		  \href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.5\textwidth, page=1]{figs/\myFiguresFile}} \\
+		  \bigskip
+			\href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.5\textwidth, page=1]{figs/\myFiguresFile}}
+			\hfill
+			\end{center}
+		\end{column}
+	\end{columns}
+	\end{figure}
+	
+	\hyperlink{app_filDyn}{\beamergotobutton{(i)}}
+  
+	\framebreak
+	
+	\begin{block}{}
+	\begin{spacing}{1.2}
+	\begin{itemize}
+	\item Dynamique hybride (CHDA): généralisation de l'ID et de la FD.\\
+	      $\rightarrow$ Simulation + fidèle (flexibilité) \\
+        $\rightarrow$ Simulation simplifiée (articulations "parfaites") \\
+        $\rightarrow$ Améliorer contrôle de robots à base flottante \\
+                      $\hookrightarrow$ $\tau_0$ connu = 0 $\rightarrow$ calcul de $\ddot{q}_0$! \\
+                                        (estimation du CoM affinée)
+\note{pour chaque articulation, on connaît soit le couple (art. $fd$) soit l'accélération (art. $id$). L'algo calcule toutes les inconnues ($fd$ $\longrightarrow$ FD, $id$ $\longrightarrow$ ID)}
+  \end{itemize}
+  \end{spacing}
+  \end{block}
+	
+	\begin{equation}
+	\bsy{\begin{bmatrix} \ddot{q}_1 \\ \ddot{q}_2	\end{bmatrix}}, \bsy{\begin{bmatrix} \tau_1 \\ \tau_2	\end{bmatrix}} = \mathrm{CHDA}(model,\bsy{q,\dot{q},\begin{bmatrix} 0 \\ \ddot{q}_2	\end{bmatrix},\begin{bmatrix} \tau_1 \\ 0	\end{bmatrix}})
+	\end{equation}
+	
 \end{frame}
 
 %==========================================================
@@ -207,17 +225,17 @@
 \section{Contraintes en performances}
 
 \begin{frame}
-  \frametitle{Contraintes}
+  \frametitle{Contraintes et méta programmation}
 
-	On se base sur le cahier des charges de l'RNEA utilisé dans le filtrage dynamique du CoM:
+	\begin{block}{Cahier des charges du RNEA}
+	Vitesse:
 	\begin{itemize}
-	\item période d'échantillonnage 5ms (1 commande vectorielle $\mathbf{q}$ de 30 DOF) -> $1ms$ pour les calculs de dynamique
-	\item fenêtre de filtrage dynamique 1.6s $•\longrightarrow$ 32 RNEA \\
-	      $\longrightarrow$ 1 RNEA en $30\mu s$ \\
-	      <v> ~ $4\mu s$ sur i7-4700HQ, ~ $15\mu s$ sur HRP2 Core2(TM) Duo E7500
+	\item fenêtre de filtrage dynamique 1.6s $\longrightarrow$ 32 RNEA /s
+	\item < v > ~ $4\mu s$ sur i7-4700HQ, ~ $15\mu s$ sur HRP2 Core2(TM) Duo E7500
 	\end{itemize}
 	
-	Même précision numérique 0.1% que pour RNEA.
+	précision numérique: 0.1%
+	\end{block}
 	
 \end{frame}
 
@@ -340,14 +358,8 @@
 \begin{frame}
   \frametitle{L'arbre cinématique, un graphe connecté, sans boucle}
   
-  \dispFig[H]{7}{.8\textwidth}{Graphe connecté de l'arbre et $\kappa(i),\mu(i),\lambda(i),\nu(i)$}{plucker}
+  \dispFig[H]{7}{.7\textwidth}{Graphe connecté de l'arbre et $\kappa(i),\mu(i),\lambda(i),\nu(i)$}{plucker}
   
-%    <figure 2.2> (modèle géométrique d'un \sigma de corps rigides. focus sur $X_{J1} = F0,1 --> F1$
-%    vJ (equ 2.2) en fonction de la matrice de sélection $S_k$ du corps $k$. (Vitesse du corps $k$ /r au corps parent. Puis exprimé dans le vecteur monde)
-%    Par récursivité surtoute la chaîne cinématique, on exprime $^ov_k$
-%    (position de l'articulation /r au corps la supportant. transformation liée à $q$ variable articulaire).
-%    Relation entre $S_k$ et $X_{Jk}$:
-%    
   \note{Modélisation de l'arbre cinématique: définition du graphe connecté}
   \begin{itemize}
 	  \item numérotation ascendante $i \in [1,9]$ telle que $\lambda(i) < i$
@@ -357,9 +369,10 @@
 \note{$\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$) \\
 		  $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$ \\
 		  $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$}
-		\item $\nu(fd)$: est le sous-arbre supporté par au moins un articulation $fd$
+		\item $\nu(fd) = \bigcup_{i \in fd}\nu(i)$
 	\end{itemize}
-
+  
+  \hyperlink{app_algSpat}{\beamergotobutton{(i)}}
 \end{frame}
 
 %==========================================================
@@ -515,7 +528,7 @@
 		  C'_{2}
 		\end{bmatrix} \label{equ_equationMvt_dynHyb2} \\
 		\notag \\
-		{\tiny \textnormal{Avec} \qquad
+		\textnormal{Avec} \qquad
 		\begin{bmatrix}
 		  C'_{1} \\
 		  C'_{2}
@@ -529,7 +542,7 @@
 		\begin{bmatrix}
 		  H_{12} \ddot{q}_2 \\
 		  H_{22} \ddot{q}_2
-		\end{bmatrix}} \label{equ_cPrime}
+		\end{bmatrix} \label{equ_cPrime}
 		\end{align}
 	\end{alertblock}
 	\end{column}
@@ -1081,9 +1094,100 @@
 \begin{frame}
   \frametitle{}
   
-  \huge{CONCLUSION}
+  \begin{center}
+  \centering \huge{CONCLUSION}
+  \end{center}
+  
+\end{frame}
+
+%==========================================================
+
+\part{}
+\section{Annexes}
+
+\subsection{Filtrage Dynamique}
+
+\hypertarget{app_filDyn}{}
+
+\begin{frame}
+  \frametitle{}
+  
+  \setmyFiguresFile{generateurDeMarche}
+  \dispFig[H]{1}{\textwidth}{Générateur de marche et le filtre dynamique}{}
+  
+  correction de la trajectoire du CoM:
+	\begin{align*}
+	  q,\dot{q},\ddot{q} = \mathrm{IK}(modele\_ponctuel, c, \dot{c}, \ddot{c}, X^f) \\
+	  f,\tau = \mathrm{ID}(modele\_complet,q,\dot{q},\ddot{q}) \longrightarrow CoP^MB \\
+	  \Delta CoM = PreviewControl(\Delta CoP) \text{de Kajita}
+	\end{align*}
+  
+  	\begin{itemize}
+	\item période d'échantillonnage 5ms (1 commande vectorielle $\mathbf{q}$ de 30 DOF) -> $1ms$ pour les calculs de dynamique
+	\item fenêtre de filtrage dynamique 1.6s $\longrightarrow$ 32 RNEA \\
+	      $\longrightarrow$ 1 RNEA en $30\mu s$ \\
+	      <v> ~ $4\mu s$ sur i7-4700HQ, ~ $15\mu s$ sur HRP2 Core2(TM) Duo E7500
+	\end{itemize}
+  
+\end{frame}
+
+\subsection{Algèbre Spatiale}
+
+\hypertarget{app_algSpat}{}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Transformation de coordonnées $^jX_i$}
+  
+  \setmyFiguresFile{modeleGeoEtArticulations}
+  \dispFig[H]{1}{.8\textwidth}{Modèle géométrique d'un $\sigma$ de corps rigides.}{}
+  
+  \framebreak
+  
+  \begin{block}{}
+  \begin{equation*}
+  ^jX_i = {^jX_{i,j}} \cdot {^{i,j}X_i} = X_J \cdot X_T
+  \end{equation*}
+  
+  \begin{itemize}
+  \item $X_T$ : position de l'articulation $j$ par rapport au corps $i$
+  \item $X_J$ : transformation induite par la rotation ou translation de $j$
+  \end{itemize}
+  \end{block}
+  
+  \bigskip
+  $S_k$ représente les degrés de libertés induis par $X_{Jk}$.
+  
+  Si $X_{J2}$ $\rightarrow$ rotation de $F_2 $autour de $Oy$ de $F_{1,2}$:
+  \begin{equation*}
+  S_2 = \begin{bmatrix}
+  0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0
+  \end{bmatrix}_{F_2}
+  \end{equation*}
+  
+  \framebreak
+  
+  Composition des vitesses:
+  
+	\begin{align*}
+	{^kv_J} &= {^kS_k} \: \dot{q}_k \\
+	{^0v_J} &= {^0X_k} {^kS_k} \: \dot{q}_k = {^0S_k} \: \dot{q}_k \\
+	{^0v_k} &= {^0v_{\lambda(k)}} + {^0v_{J}} \\
+	&= {^0v_{\lambda(k)}} + {^0S_k} \: \dot{q}_k \\
+	 v_k &= \sum_{i \in \kappa(k)} {^0S_i} \: \dot{q}_i
+	\end{align*}
+    
+\end{frame}
+
+\subsection{Algorithme hybride}
+
+\begin{frame}
+  \frametitle{}
+  
   
 \end{frame}
 
 
+%==========================================================
+
 \end{document}
+
