@@ -55,7 +55,7 @@
 \author{Nuno Guedelha}
 \title{Implémentation et application d'un algorithme de Dynamique Hybride}
 %\setbeamercovered{transparent} 
-\setbeamertemplate{navigation symbols}{} 
+%\setbeamertemplate{navigation symbols}{} 
 %\logo{} 
 \institute{LAAS-CNRS}
 \date{} 
@@ -258,107 +258,121 @@
 
 %==========================================================
 
-\section{Algèbre Spatiale et construction d'un arbre cinématique}
-
-\subsection{Formalisme de l'Algèbre Spatiale}
-\setmyFiguresFile{figures}
+\section{Formalisme: l'Algèbre Spatiale}
 
 \begin{frame}
   \frametitle{}
-  
-  \begin{block}{Formalisme basé sur la mécanique des torseurs}
-  \begin{spacing}{1}
-  \note{Notations simplifiées et spécifiques à Featherstone}
-  \begin{itemize}
-	  \item vitesse spatiale $\widehat{v} \iff$ torseurs de mouvement
-	        \note{%
-	        $\widehat{v}_O = $ vitesse du flux de points du corps à travers $O$ \\
-	        vecteur = $\omega$, moment = $v_O$ \\
-	        ensemble de vecteurs liés => champ antisymétrique}
-	  \item force spatiale $\widehat{f} \iff$ torseur de force
-	  \item composition des vitesses, forces $\longrightarrow$ \textbf{additive}:
-	  \begin{description}
-	    \item[vitesse:] translation + rotation d'un seul corps \\
-	                    vitesse relative enfant / parent
-	    \item[force:] couple + force linéaire \\
-	                  force à travers une articulation
-	  \end{description}
-  \end{itemize}
-  \end{spacing}
-  \end{block}
-  
-  \begin{columns}[onlytextwidth]
-    \begin{column}{.5\textwidth}\footnotesize
-		  rotation $\omega \rightarrow \widehat{v}_O = \bsy{\begin{bmatrix} \omega \\ v_O = OP \times \omega \end{bmatrix}} \quad$ \\
-		  translation $v_p \rightarrow \widehat{v}_O = \bsy{\begin{bmatrix} 0 \\ v_O = v_P \end{bmatrix}}$
-    \end{column}
-    \begin{column}{.5\textwidth}
-      \vspace{-0.5cm} \dispFig[H]{1}{\textwidth}{}{vitesseSpatiale}
-    \end{column}
-  \end{columns}
-  
-\end{frame}
 
-\begin{frame}
-  \frametitle{}
-  
-  \note{
-  force f en p  => fo=[n0=op x f; f] \\
-  couple np en p=> fo=[np; 0]}
+- Les bases de l'algorithme: formalisme de l'Algèbre Spatiale
 
-  \begin{block}{Spécificités de l'Algèbre Spatiale}
-  \begin{spacing}{1.2}
-  \begin{itemize}
-	  \item base de \emph{Plücker}
-	  \item accélération, nouvelle définition
-	  \begin{description}
-	    \item[mécanique classique:] accélération du point lié au solide
-	    \item[algèbre spatiale:] $\widehat{a}_O = \bsy{\begin{bmatrix} \dot{\omega} \\ \dot{v}_O \end{bmatrix}}$ (point $O$ fixe) \\
-	                             \textcolor{red}{$\hookrightarrow$ composition des accélérations \textbf{additive}}
-	                             \note{Exemple: corps en rotation $\omega$ constant $\rightarrow \widehat{a}_O = \bsy{0}$}
-	  \end{description}
-	  \item sélectivité $S \rightarrow $ DOF d'une articulation dans la base de \emph{Plücker}
-	\end{itemize}
-	\end{spacing}
-  \end{block}
-  
-  \begin{columns}[onlytextwidth]
-    \begin{column}{.6\textwidth}
-      base de \emph{Plücker} $D_O$: \\
-      $\widehat{v}_O = \begin{bmatrix} \omega_x \: \omega_y \: \omega_z \: v_{Ox} \: v_{Oy} \: v_{Oz} \end{bmatrix}_{D_O}^T$
-    \end{column}
-    \begin{column}{.4\textwidth}
-      \dispFig[H]{3}{.8\textwidth}{}{plucker}
-      \note{w est une composition de dOx, dOy, dOz. v_O est une composition de dx, dy, dz}
-    \end{column}
-  \end{columns}
-  
-\end{frame}
+  mécanique des torseurs avec des notations simplifiées et spécifiques à Featherstone
 
-\subsection{Structure d'un arbre cinématique}
-
-\begin{frame}
-  \frametitle{L'arbre cinématique, un graphe connecté, sans boucle}
-  
-  \dispFig[H]{7}{.8\textwidth}{Graphe connecté de l'arbre et $\kappa(i),\mu(i),\lambda(i),\nu(i)$}{plucker}
-  
+  Torseurs, vecteurs spaciaux et bases de \emph{Plücker}
+    (torseur: le moment d'un ensemble de vecteurs liés a la forme d'un champ antisymétrique => vecteur et moment du torseur.
+    Le vecteur est l'opérateur "ax" du produit vectoriel: f, w.)
+    
+    - torseurs de mouvement: vitesse
+%    <figure 2.1(a) p14> et <base de \emph{Plücker}>
+    rotation w autour de p=> vo =  [wo=wp;vo=op x w]
+    translation vp        => vo =  [vp]
+    
+    Voir le corps comme un fluide en mouvement. $v$ = vitesse du flux de points du corps à travers $O$
+%    
+%%    - torseurs de mouvement: accélération
+%%    $ao = d/dt[w;vo] = [\dot{w};\dot{v}_o]$
+%%    (Différent de l'accélération classique, liée à un point fixe du corps.
+%%    Approche classique -> vo(t+dt) bouge avec le point $O$
+%%    Approche spatiale  -> vo(t+dt) lié à un point fixe de l'espace)
+%%    
+%%    exemples de cas simples: corps en rotation pure => vo=[wp;op x w]
+%%                                                    => ao=0
+%    
+%%    (préparer exercice avec chaîne coplanaire)
+%    
+%    - torseur de force
+%    <figure B.1(b)>
+%    force f en p  => fo=[n0=op x f; f]
+%    couple np en p=> fo=[np; 0]
+%    
+%    - moment et inertie
+%    vec spatial ĥ: <featherstone equ 2.59>
+%    Mêmes propriétés qu'un vecteur force (règles de transformation)
+%    NRJ cinétiquee = 1/2ĥ.v (produit scalaire invariant)
+%    Inertie: h=Iv => <featherstone equ 2.62>
+%    => transformation: <featherstone equ 2.66>
+%    
+%  vecteurs spatiaux et opérations
+%    mêmes propriétés que les torseurs par rapport aux différentes opérations:
+%    - somme
+%    - produit par un scalaire
+%    - produit scalaire, vectoriel
+%    => équivalent aux opérations sur les matrices associées aux torseurs
+%    
+%  Articulations, contraintes
+%    - transformations de coordonnées, matrice de passage $^BX_A$
+%    - transf. pour torseur de mouvement=> $X$
+%      transf. pour torseur de force    => (produit scalaire est invariant=>) $X^{\asterisc}  = (X^{-1})^T = X^{-T}$
 %    <figure 2.2> (modèle géométrique d'un \sigma de corps rigides. focus sur $X_{J1} = F0,1 --> F1$
 %    vJ (equ 2.2) en fonction de la matrice de sélection $S_k$ du corps $k$. (Vitesse du corps $k$ /r au corps parent. Puis exprimé dans le vecteur monde)
 %    Par récursivité surtoute la chaîne cinématique, on exprime $^ov_k$
 %    (position de l'articulation /r au corps la supportant. transformation liée à $q$ variable articulaire).
 %    Relation entre $S_k$ et $X_{Jk}$:
 %    
-  \note{Modélisation de l'arbre cinématique: définition du graphe connecté}
-  \begin{itemize}
-	  \item numérotation ascendante $i \in [1,9]$ telle que $\lambda(i) < i$
-	  \item arc $i$ connecte corps $i$ à son parent
-\note{$p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$}
-		\item $\lambda(i)$ est le noeud \emph{parent} du corps $i$
-\note{$\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$) \\
-		  $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$ \\
-		  $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$}
-		\item $\nu(fd)$: est le sous-arbre supporté par au moins un articulation $fd$
-	\end{itemize}
+%  Modélisation de l'arbre cinématique: définition du graphe connecté
+%    Description d'un arbre cinématique:
+%%    <schéma corps et arbre cin> (à créer)
+%    (animation montrant la numérotation et les notions prédécesseur, succ, \nu \mu etc)
+%    - numérotation:
+%      - noeud $i$ = corps $i$, arc $i$ = articulation $i$ ($i \in [1,N]$)
+%      - noeud racine (0) = base fixe
+%      - numérotation ascendante $i \in [1,N]$ telle que $\lambda(i) < i$
+%      - arc $i$ connecte corps $i$ à son parent
+%      
+%    concepts fondamentaux sur la représentation des arbres cinématiques \cite[ch.4.1]{bib_featherstone}:
+%
+%\begin{itemize}
+%\item $p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$
+%\item $\lambda(i)$ est le noeud \emph{parent} du corps $i$
+%\item $\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$)
+%\item $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$
+%\item $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$
+%\item $\nu(fd)$: est le sous-arbre supporté par au moins un articulation $fd$
+%\end{itemize}
+%
+%    on illustre les ensembles qu'on vient de décrire.\\
+%
+%\begin{figure}[H]
+%\minipages[2]{c}{.5}{.5}{}
+%{%
+%  \begin{center}
+%  	\incFig[1]{0.8\textwidth}
+%  	\end{center}
+%}
+%{%
+%  \begin{center}
+%  	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+%  	\hline 
+%	articul. $i$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\ 
+%  	\hline 
+%  	$p$ & 0 & 1 & 1 & 2 & 2 & 3 & 3 \\ 
+%  	\hline 
+%  	$s$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\ 
+%  	\hline 
+%  	$\lambda$ & 0 & 1 & 1 & 2 & 2 & 3 & 3 \\ 
+%  	\hline 
+%  	\end{tabular} 
+%  \end{center}
+%}{}
+%\caption{$p$, $s$, $\lambda$, $\kappa$, $\mu$ et $\nu$ dans l'arbre cinétique}
+%\label{fig_chdaArbreK_p_s_k_mu_nu}
+%\end{figure}
+%
+%\setmyFiguresFile{optimisations}
+%
+%\begin{minipage}[c]{0.5\textwidth}
+%  \dispFig[H]{5}{0.7\textwidth}{Exemple de $\nu(fd)$ dans l'arbre cinématique. Le noeud 1 n'appartient pas à $\nu(fd)$}{fig_chdaArbreK_nuFD}
+%\end{minipage}
+
 
 \end{frame}
 

@@ -72,7 +72,7 @@ Plan...
                     -> $f,\tau = \mathrm{ID}(modele_complet,q,\dot{q},\ddot{q})$ --> CoP^MB
                     -> $\delta CoM = PreviewControl(\delta CoP) de Kajita$
     
-%====================================================================================================================
+%=========================================== intégré ================================================================
 
 - Contraintes en performances
 
@@ -105,7 +105,7 @@ génère du code optimisé spécifique au modèle $M$
 <schéma fonctionnel interne de metapod>
 
 
-%====================================================================================================================
+%======================================== intégré ===================================================================
 
 - Les bases de l'algorithme: formalisme de l'Algèbre Spatiale
 
@@ -116,7 +116,7 @@ génère du code optimisé spécifique au modèle $M$
     Le vecteur est l'opérateur du produit vectoriel: f, w.)
     
     - torseurs de mouvement: vitesse
-    <figure 2.1(a) p14> et <base de \emph{Plücker}>
+%    <figure 2.1(a) p14> et <base de \emph{Plücker}>
     rotation w autour de p=> vo =  [wo=wp;vo=op x w]
     translation vp        => vo =  [vp]
     
@@ -164,7 +164,7 @@ génère du code optimisé spécifique au modèle $M$
     
   Modélisation de l'arbre cinématique: définition du graphe connecté
     Description d'un arbre cinématique:
-    <schéma corps et arbre cin> (à créer)
+%    <schéma corps et arbre cin> (à créer)
     (animation montrant la numérotation et les notions prédécesseur, succ, \nu \mu etc)
     - numérotation:
       - noeud $i$ = corps $i$, arc $i$ = articulation $i$ ($i \in [1,N]$)
