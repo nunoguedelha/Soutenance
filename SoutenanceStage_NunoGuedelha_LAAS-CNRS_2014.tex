@@ -138,7 +138,7 @@
 	\bigskip
   Réflexion sur l'application de la Dynamique Hybride:
   	\begin{itemize}
-		\item modélisation d'articulations flexibles ("compliant")
+		\item modélisation d'articulations flexibles ("compliantes")
 		\item commande de robot ayant une base flottante
   \end{itemize}
 	
@@ -191,9 +191,9 @@
 		\end{column}
 		\begin{column}{.3\textwidth}
 		  \begin{center}
-		  \href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.9\textwidth, page=1]{figs/hrp2Control}} \\
+		  \includegraphics[width=.9\textwidth]{figs/HRP2_stairs2} \\
 		  \bigskip
-			\href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.9\textwidth, page=1]{figs/hrp2Control}}
+			\href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.9\textwidth]{figs/hrp2Control}}
 			\hfill
 			\end{center}
 		\end{column}
@@ -220,7 +220,15 @@
 	\bsy{\begin{bmatrix} \ddot{q}_1 \\ \ddot{q}_2	\end{bmatrix}}, \bsy{\begin{bmatrix} \tau_1 \\ \tau_2	\end{bmatrix}} = \mathrm{CHDA}(model,\bsy{q,\dot{q},\begin{bmatrix} 0 \\ \ddot{q}_2	\end{bmatrix},\begin{bmatrix} \tau_1 \\ 0	\end{bmatrix}})
 	\end{equation}
 	
+	\framebreak
+	
+	\begin{figure}[H]
+	\includegraphics[width=.55\textwidth]{figs/actionneurRaideurVariable}
+	\includegraphics[width=.45\textwidth]{figs/jambeFlexibleRaideurVariable}
+	\end{figure}
+	
 \end{frame}
+
 
 %==========================================================
 
@@ -770,9 +778,9 @@
   
   \begin{block}{Calcul de $H$ limité aux coefficients de $H_{11}$ (Hybrid CRBA)}
   \begin{itemize}
-    \item Calcul de $H$ complet: $\forall noeud_i$ sauf la base, calcul de $H_{ij}$ ($j$ = noeud sélectionné en remontant l'arbre vers la racine)
-	  \item Optimisation $H_{11}$: parcours de $\nu(fd)$, et $H_{ij}$ calculés pour $i,j \in fd$
-	  \item Optimisation $H_{11}$ + $H_{21}$: parcours étendu au reste de l'arbre si $i \in fd$
+    \item Calcul de $H$ complet: $\forall corps_i$, calcul de $H_{ij}$ ($j$ = noeud sélectionné en remontant l'arbre vers la racine)
+	  \item Optimisation $H_{11}$: parcours de $\nu(fd)$, et $H_{ij}$ calculés pour $(i \wedge j) \in fd$
+	  \item Optimisation $H_{11}$ + $H_{21}$: parcours étendu, calcul pour $(i \vee j) \in fd$
   \end{itemize}
 	\end{block}    
   
@@ -823,7 +831,7 @@
 	\bsy{C'} + \mathrm{ID} \left( \bsy{q,\dot{q}},Q^T \bsy{\begin{bmatrix}
 	                                                         \ddot{q}_1 \\      
 	                                                          0         
-	                                                       \end{bmatrix}} \right) - Q \: \mathrm{ID}(\bsy{q,\dot{q},0})
+	                                                       \end{bmatrix}} \right) - \mathrm{ID}(\bsy{q,\dot{q},0})
 	\end{equation}
 	
 	\bigskip
@@ -965,7 +973,7 @@
 \section{Conclusion et perspectives}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Conclusion}
   
   \begin{block}{acquis personnels}
   \begin{itemize}
@@ -974,13 +982,13 @@
   \end{itemize}
   \end{block}
   
-  \begin{block}{Prochains objectis}
+  \begin{block}{Prochains objectifs}
   \begin{itemize}
-  \item long terme: Recherche dans un laboratoire ou en R&D dans une entreprise
+  \item long terme: Recherche dans un laboratoire ou en R\&D dans une entreprise
   \item court terme: développer la compétence en dynamique des corps
   \end{itemize}
   \end{block}
- 
+  
 \end{frame}
 
 %==========================================================
