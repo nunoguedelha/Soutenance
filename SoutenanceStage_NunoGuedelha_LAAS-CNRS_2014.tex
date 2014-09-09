@@ -161,43 +161,45 @@
 	  \item[$\bsy{\tau}$ :] forces/couples moteurs (internes) appliqués aux articulations
 	  \item[$\bsy{f^{ext}}$ :] forces de contrainte extérieures (force de gravitation, coriolis, forces de contact, ...)
 	\end{description}
+	\medskip
+	\small{RNEA="Recursive Newton-Euler Algorithm" \\
+	      CRBA="Composite Rigid Body Algorithm"}
 	
 	\framebreak
-
-  \setmyFiguresFile{hrp2Control}
 	
-	3 types de problèmes dynamiques et applications:
+	\hypertarget{ch_ID}{}
+	
+	3 types de problèmes dynamiques et applications: \hfill \hyperlink{app_filDyn}{\beamergotobutton{(i)}}
 	\begin{figure}[T]
 	\begin{columns}[T]
-	  \begin{column}{.48\textwidth}
+	  \begin{column}{.68\textwidth}
 		  \begin{itemize}
-		  	\item dynamique directe \\
-		  	      $\rightarrow$ \href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}	{\textcolor{blue}{simulation}}:
+		  	\item dynamique directe $\rightarrow$ \textcolor{blue}{simulation}: \\
+		  	      (RNEA + CRBA)
 		  	      \note{trouver les accélérations induites par les forces appliquées aux articulations}
 						\begin{equation}
 						\ddot{q} = \mathrm{FD}(model,\bsy{q,\dot{q},\tau})
 						\end{equation}
-		  \item 	dynamique inverse \\
-		        $\rightarrow$ contrôle du \emph{CoM} (compense l'inertie des bras):
+		  \item 	dynamique inverse $\rightarrow$ \textcolor{blue}{contrôle du \emph{CoM}}:
+		        (RNEA)
 		        \note{trouver les forces à appliquer aux accélérations pour produire les articulations voulues. Estimation du centre de pression $\longrightarrow$ injecté dans le PC (preview control) $\longrightarrow$ générer trajectoire CoM}
 						\begin{equation}
 						\bsy{\tau} = \mathrm{ID}(model,\bsy{q,\dot{q},\ddot{q}})
 						\end{equation}
+						(compense l'inertie des bras)
 			\end{itemize}
 		\end{column}
-		\begin{column}{.48\textwidth}
+		\begin{column}{.3\textwidth}
 		  \begin{center}
-		  \href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.5\textwidth, page=1]{figs/\myFiguresFile}} \\
+		  \href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.9\textwidth, page=1]{figs/hrp2Control}} \\
 		  \bigskip
-			\href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.5\textwidth, page=1]{figs/\myFiguresFile}}
+			\href{run:/home/nuno/Documents/Stage/Documents/Videos/14-ichr-metapod-v6-submitted.mp4}{\includegraphics[width=.9\textwidth, page=1]{figs/hrp2Control}}
 			\hfill
 			\end{center}
 		\end{column}
 	\end{columns}
 	\end{figure}
-	
-	\hyperlink{app_filDyn}{\beamergotobutton{(i)}}
-  
+	  
 	\framebreak
 	
 	\begin{block}{}
@@ -231,25 +233,22 @@
 	Vitesse:
 	\begin{itemize}
 	\item fenêtre de filtrage dynamique 1.6s $\longrightarrow$ 32 RNEA /s
-	\item < v > ~ $4\mu s$ sur i7-4700HQ, ~ $15\mu s$ sur HRP2 Core2(TM) Duo E7500
+	\item  RNEA ~ $4\mu s$ sur i7HQ, ~ $15\mu s$ sur HRP2 DualCore \note{i7-4700HQ, HRP2 Core2(TM) Duo E7500}
 	\end{itemize}
 	
-	précision numérique: 0.1%
+	précision numérique: 0.1\%
 	\end{block}
 	
-\end{frame}
-
-\begin{frame}
-  \frametitle{Algèbre Spatiale et méta programmation}
+  \begin{block}{Algèbre Spatiale et méta programmation}
   
   \begin{itemize}
-  \item basée sur les torseurs (avec différence de notation), réduit la compléxité de la modélisation dynamique, comb. translation/rotation \\
-        (composition simplifiée des vitesses et accélérations)
-  \item Algos CRBA et RNEA exploitent la récursivité (\emph{pattern} Visiteur), la "sparsité" / abscesnce de couplage entre branches cinématiques
-  \item méta prog. => propriétés d'un langage symbolique (calculs inutiles non exécutés)
-  \item méta fonctions génèrent des traitements/calculs numériques à la compilation \\
-        (conditions méta fonction: params->types ou int statiques et constants)
+  \item modélisation dynamique simplifiée par l'Algèbre Spatiale \\
+  \item récursivité (\emph{pattern} Visiteur), "sparsité" \note{abscesnce de couplage entre branches cinématiques. exploités par CRBA et RNEA}
+  \item méta prog. $\iff$ langage symbolique \note{calculs inutiles non exécutés}
+  \item méta fonctions: traitements à la compilation \\
+        \note{conditions méta fonction: params->types ou int statiques et constants}
   \end{itemize}
+	\end{block}
   
 \end{frame}
 
@@ -276,9 +275,8 @@
 
 %==========================================================
 
-\section{Algèbre Spatiale et construction d'un arbre cinématique}
+\section{Algèbre Spatiale: formalisme}
 
-\subsection{Formalisme de l'Algèbre Spatiale}
 \setmyFiguresFile{figures}
 
 \begin{frame}
@@ -353,28 +351,6 @@
   
 \end{frame}
 
-\subsection{Structure d'un arbre cinématique}
-
-\begin{frame}
-  \frametitle{L'arbre cinématique, un graphe connecté, sans boucle}
-  
-  \dispFig[H]{7}{.7\textwidth}{Graphe connecté de l'arbre et $\kappa(i),\mu(i),\lambda(i),\nu(i)$}{plucker}
-  
-  \note{Modélisation de l'arbre cinématique: définition du graphe connecté}
-  \begin{itemize}
-	  \item numérotation ascendante $i \in [1,9]$ telle que $\lambda(i) < i$
-	  \item arc $i$ connecte corps $i$ à son parent
-\note{$p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$}
-		\item $\lambda(i)$ est le noeud \emph{parent} du corps $i$
-\note{$\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$) \\
-		  $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$ \\
-		  $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$}
-		\item $\nu(fd) = \bigcup_{i \in fd}\nu(i)$
-	\end{itemize}
-  
-  \hyperlink{app_algSpat}{\beamergotobutton{(i)}}
-\end{frame}
-
 %==========================================================
 
 \part{}
@@ -387,8 +363,8 @@
  
   Algorithmes déjà implémentés:
   \begin{itemize}
-  \item Dynamique inverse:	"Recursive Newton-Euler Algorithm"
-  \item Dynamique directe:	"Composite-Rigid-Body Algorithm"
+  \item Dynamique inverse (RNEA)
+  \item Dynamique directe (CRBA: inertie $H$)
   \end{itemize}
   \bigskip
   Algorithmes à implémenter et intégrer à la Dynamique Hybride:
@@ -411,8 +387,6 @@
   \end{block}
   
   \begin{description}
-    \item[$\bsy{q, \dot{q}, \ddot{q}}$ :] vecteurs de position, vitesse, accélération
-    \item[$\bsy{\tau}$ :] forces/couples moteurs (internes)
     \item[$\bsy{H}$ :] matrice des termes inertiels
     \item[$\bsy{C}$ :] forces de précontrainte extérieures
   \end{description}
@@ -426,6 +400,7 @@
   \end{cases}
   \end{equation*}
   
+  \bigskip
   ordre par défaut de $q_i$ dans $\boldsymbol{q}$:
   $\hookrightarrow$ suivant parcours DFS
   
@@ -434,8 +409,10 @@
 \end{frame}
 
 \begin{frame}
-
+  
   \frametitle{Permutation des vecteurs et coefficients...}
+  \hypertarget{ch_permutation}{}
+  
   \setmyFiguresFile{hybridDynamics4etapes}
   \begin{columns}[T]
     \begin{column}{.7\textwidth}\small
@@ -474,7 +451,7 @@
   \end{column}%
   \hfill%
   \begin{column}{.3\textwidth}
-    \dispFig[H]{1}{\textwidth}{Arbre cinématique}{fig_chdaArbreK1}
+    \vspace{-.5cm} \dispFig[H]{1}{\textwidth}{Arbre cinématique}{fig_chdaArbreK1}
   \end{column}%
   \end{columns} \pause
 	
@@ -503,6 +480,7 @@
 		\end{bmatrix} \label{equ_local_eqMvt_2}
 		\end{align}
 	\end{alertblock}
+	\vspace{.8cm}\hyperlink{app_algSpat1}{\beamergotobutton{(i)}}
 	\end{column}
 
 	\begin{column}{.5\textwidth}\footnotesize
@@ -547,79 +525,15 @@
 	\end{alertblock}
 	\end{column}
 	\end{columns}
-  
+
 \end{frame}
 
 \begin{frame}\small
 
   \frametitle{Quatre étapes de résolution...}
   
-  % affichage au coin droit supérieur des équations de référence
-  \begin{columns}[T]
-  \begin{column}{.6\textwidth}
-    equ.\eqref{equ_equationMvt_dynHyb2} Se décline en 2 lignes... \bigskip \\
-    \begin{enumerate}
-    \item <3-> calcul de $\boldsymbol{C'}$
-    \item <3-> calcul de $H_{11}$
-    \item <1-> ${\eqref{equ_equationMvt_dynHyb2} \implies H_{11} \bsy{\ddot{q}_1 = \tau_1 - C'_1}}$ \\
-    $\hookrightarrow$ résoudre $\ddot{q}_1$
-    \item <2-> $\eqref{equ_equationMvt_dynHyb2} \implies \bsy{\tau_2 = C'_2} + H_{21} \bsy{\ddot{q}_1}$
-    \end{enumerate}
-  \end{column}
-  \begin{column}{.37\textwidth}
-  	\begin{block}{\footnotesize{équations de mouvement reformulées:}}\tiny
-	  \begin{align*}
-	  	\begin{bmatrix}
-		  H_{11} & H_{12} \\
-		  H_{21} & H_{22}
-		\end{bmatrix} 
-		\cdot
-		\begin{bmatrix}
-		  \ddot{q}_{1} \\
-		  \ddot{q}_{2}
-		\end{bmatrix} 
-		&= 
-		\begin{bmatrix}
-		  \tau_{1} \\
-		  \tau_{2}
-		\end{bmatrix} 
-		-
-		\begin{bmatrix}
-		  C_{1} \\
-		  C_{2}
-		\end{bmatrix} \quad \eqref{equ_local_eqMvt_2} \\
-		\notag \\
-		\begin{bmatrix}
-		  H_{11} & 0 \\
-		  H_{21} &  -I
-		\end{bmatrix} 
-		\cdot
-		\begin{bmatrix}
-		  \ddot{q}_1 \\
-		  \tau_2
-		\end{bmatrix} 
-		&=
-		\begin{bmatrix}
-		  \tau_1 \\
-		  0
-		\end{bmatrix} 
-		-
-		\begin{bmatrix}
-		  C'_{1} \\
-		  C'_{2}
-		\end{bmatrix} \quad \eqref{equ_equationMvt_dynHyb2} \\
-		\end{align*}
-	\end{block}
-  \end{column}
-  \end{columns}
-  \vfill
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{Calcul des coefficients...}
-  
-  	\begin{block}{\footnotesize{équations de mouvement reformulées:}}\tiny
+  % affichage en haut les équations de référence
+  	\begin{block}{\footnotesize{équations de mouvement reformulées:}}\footnotesize
   	\setlength\abovedisplayskip{0pt}
   	\setlength\belowdisplayskip{0pt}
   \begin{align*}
@@ -641,7 +555,7 @@
 	\begin{bmatrix}
 	  C_{1} \\
 	  C_{2}
-	\end{bmatrix} \quad \eqref{equ_local_eqMvt_2} \hspace{2cm}
+	\end{bmatrix} \quad \eqref{equ_local_eqMvt_2} \hspace{.85cm}
 	\begin{bmatrix}
 	  H_{11} & 0 \\
 	  H_{21} &  -I
@@ -664,11 +578,73 @@
 	\end{align*}
   \end{block}
   
+  \bigskip
+  equ.\eqref{equ_equationMvt_dynHyb2} Se décline en 2 lignes... \bigskip \\
+  \begin{enumerate}
+  \item <3-> calcul de $\boldsymbol{C'}$
+  \item <3-> calcul de $H_{11} \quad ( H = \mathrm{CRBA}(model,\bsy{q}) )$
+  \item <1-> ${\eqref{equ_equationMvt_dynHyb2} \implies H_{11} \bsy{\ddot{q}_1 = \tau_1 - C'_1}}$ \\
+  $\hookrightarrow$ résoudre $\ddot{q}_1$
+  \item <2-> $\eqref{equ_equationMvt_dynHyb2} \implies \bsy{\tau_2 = C'_2} + H_{21} \bsy{\ddot{q}_1}$
+  \end{enumerate}
+  \vfill
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Calcul des coefficients...}
+  
+  	\begin{block}{\footnotesize{équations de mouvement reformulées:}}\footnotesize
+  	\setlength\abovedisplayskip{0pt}
+  	\setlength\belowdisplayskip{0pt}
+  \begin{align*}
+  	\begin{bmatrix}
+	  H_{11} & H_{12} \\
+	  H_{21} & H_{22}
+	\end{bmatrix} 
+	\cdot
+	\begin{bmatrix}
+	  \ddot{q}_{1} \\
+	  \ddot{q}_{2}
+	\end{bmatrix} 
+	= 
+	\begin{bmatrix}
+	  \tau_{1} \\
+	  \tau_{2}
+	\end{bmatrix} 
+	-
+	\begin{bmatrix}
+	  C_{1} \\
+	  C_{2}
+	\end{bmatrix} \quad \eqref{equ_local_eqMvt_2} \hspace{.85cm}
+	\begin{bmatrix}
+	  H_{11} & 0 \\
+	  H_{21} &  -I
+	\end{bmatrix} 
+	\cdot
+	\begin{bmatrix}
+	  \ddot{q}_1 \\
+	  \tau_2
+	\end{bmatrix} 
+	=
+	\begin{bmatrix}
+	  \tau_1 \\
+	  0
+	\end{bmatrix} 
+	-
+	\begin{bmatrix}
+	  C'_{1} \\
+	  C'_{2}
+	\end{bmatrix} \quad \eqref{equ_equationMvt_dynHyb2} \\
+	\end{align*}
+  \end{block}
+  
+  \bigskip
 	Calcul de $C'$: 
 	\begin{columns}[onlytextwidth]
-	\begin{column}[c]{0.8\textwidth}\scriptsize
+	\begin{column}[c]{0.8\textwidth}\footnotesize
 	\begin{align*}
-	\left. \textnormal{Pour} \quad \ddot{q}=
+	&\textnormal{Pour} \quad \ddot{q}=
 	\begin{bmatrix}
 	  0 \\
 	  \ddot{q}_2
@@ -699,14 +675,11 @@
 	  0 \\
 	  \ddot{q}_2
 	\end{bmatrix} \right)
-	\end{cases} \right]
-	\iff
-	\end{align*}
-	\end{column}
-	\begin{column}[c]{0.27\textwidth}\tiny
-	\begin{block}{}
-	\begin{spacing}{1.5}
-	$\begin{bmatrix}
+	\end{cases} \\
+	\notag \\
+	&\iff
+	\colorbox{green}{$
+	\begin{bmatrix}
 	  C'_1 \\
 	  C'_2
 	\end{bmatrix}
@@ -715,33 +688,24 @@
 	\begin{bmatrix}
 	  0 \\
 	  \ddot{q}_2
-	\end{bmatrix} \right)$
-	\end{spacing}
-	\end{block}
+	\end{bmatrix} \right)$}
+	\end{align*}
+	\end{column}
+	\begin{column}[c]{0.27\textwidth}
 	\end{column}
 	\end{columns}
   
-  \bigskip
-	Calcul de $H_{11}$, sous-matrice de $H$:
-	\begin{itemize}
-	\item calcul de $H = \mathrm{CRBA}(modèle,q)$
-	\item permutation $H' = Q H Q^T$
-	\item sélection de $H_{11}$ (méthode d'accès par blocs de la classe \verb;Eigen::Matrix; $\longrightarrow$ \verb;H'.block<$n_{fd}$,$n_{fd}$>;)
-	\end{itemize}
-
 \end{frame}
 
 \begin{frame}[allowframebreaks]
-  \frametitle{Résolution des équations...}
+  \frametitle{Résolution des équations et calcul de $\tau_2$...}
   
   \begin{columns}[T]
 	\begin{column}{0.5\textwidth}
 		Résoudre $\ddot{q}_1$:
 		\begin{itemize}
 		\item Système linéaire: $H_{11} \ddot{q}_1 = \tau_1 - C'_1$
-		\item Inversion de $H$ trop coûteuse \\
-		      (complexité $O(n^3)$ \\
-		      $\hookrightarrow$  décompoer de $H$
+		\item $\rightarrow$ décomposer $H$
 		\end{itemize}
   \end{column}
 	\begin{column}{0.5\textwidth}\scriptsize
@@ -757,15 +721,20 @@
 	\end{column}
 	\end{columns}
 
-  \bigskip
-  
+  \vspace{1cm}
   \begin{columns}[T]
 	\begin{column}{0.55\textwidth}
-		Critères de choix de la décomposition: propriétés de $H_{11}$ et complexité de la décomposition:
+		Choix de la décomposition $\rightarrow$ propriétés de $H_{11}$ et complexité:
 		\begin{itemize}
 		\item $H$ et $H_{11}$ symétriques, définies positives 
-		\item factorisation $LDL^T$ et $LL^T$ sont applicables
-		\item $\hookrightarrow$ factorisation $LDL^T$ (robuste, rapide, la plus appropriée)
+		\item $LDL^T$ + robuste, + rapide
+		\end{itemize}
+		
+		\bigskip
+		Calcul de $\tau_2$:
+		\begin{itemize}
+		\item Sélection de $H_{21}$ dans  $H'$
+		\item $\tau_2 = C'_2 + H_{21} \ddot{q}_1$
 		\end{itemize}
   \end{column}
 	\begin{column}{0.45\textwidth}
@@ -774,82 +743,13 @@
     \begin{itemize}
 	    \item $D \longrightarrow$ diagonale
 	    \item $L \longrightarrow$ triangulaire inférieure \\
-	                              $\forall i: L_{ii}=1$)
+	                              \note{$\forall i: L_{ii}=1$)}
 	    \item Solveur \verb;Eigen::LDLT;
 	  \end{itemize}
     \end{alertblock}
 	\end{column}
 	\end{columns} \vfill
-
-	\framebreak
 	
-	Calcul de $\tau_2$:
-	\begin{itemize}
-	\item Sélection de $H_{21}$ dans  $H'$
-	\item $\tau_2 = C'_2 + H_{21} \ddot{q}_1$
-	\end{itemize} \vfill
-	
-\end{frame}
-	
-\begin{frame}
-	\frametitle{Algorithme complet:}
-	  
-	\begin{spacing}{1.5}
-	\begin{columns}[T]\scriptsize
-%	\setlength{\columnsep}{10pt}
-%	\setlength{\columnseprule}{0.5pt}
-	\begin{column}{.48\textwidth}
-	\begin{pseudocode}{hybridDynamics}{model, q, \dot{q}, \ddot{q}, \tau}
-	(1)
-	\BEGIN
-	  \textnormal{\# Calul de $C'$, $C'_1$ et $C'_2$} \\
-	  \ddot{q}_{perm} \GETS Q \ddot{q} \\
-	  (\ddot{q}_{perm})_{i \in [1,fd]} \GETS 0 \\
-	  \ddot{q}_2 \GETS (\ddot{q}_{perm})_{i \in [fd+1,n_{dof}]} \\
-	  \ddot{q} \GETS Q^T \ddot{q}_{perm} \\
-	  model.torques \GETS rnea(model,q,\dot{q},\ddot{q}) \\
-	  C' \GETS getTorques(model) \\
-	  C'_{perm} \GETS Q C'\\
-	  C'_1 \GETS (C'_{perm})_{i \in [1,fd]} \\
-	  C'_2 \GETS (C'_{perm})_{i \in [fd+1,n_{dof}]}
-	\END \\
-	(2)
-	\BEGIN
-	  \textnormal{\# Calcul de $H_{11}$} \\
-	  model.H \GETS crba(model,q) \\
-	  H_{perm} \GETS Q model.H Q^T \\
-	  H_{11} \GETS (H_{perm})_{i,j \in [1,fd]} 
-	\END 
-	\end{pseudocode}
-	\end{column}
-	\begin{column}{.48\textwidth}
-	\begin{pseudocode}{ }{ }
-	(3) 
-	\BEGIN
-	  \textnormal{\# Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$} \\
-	  \tau_{perm} \GETS Q \tau \\
-	  \tau_1 \GETS (\tau_{perm})_{i \in [1,fd]} \\
-	  \tau_2 \GETS (\tau_{perm})_{i \in [fd+1,n_{dof}]} \\
-	  b \GETS \tau_1 - C'_1 \\
-	  A \GETS H_{11} \\
-	  lltOfH11 \GETS LLT(A) \hfill \textnormal{\# création du solveur} \\
-	  \ddot{q}_1 \GETS lltOfH11.solve(b) \hfill \textnormal{\# résolution} 
-	\END \\
-	(4) 
-	\BEGIN
-	  \textnormal{\# Calcul de $\tau_2$ et reconstruction des vecteurs de} \\
-	  \textnormal{\# sortie $\ddot{q}$ et $\tau$} \\
-	   H_{21} \GETS (QHQ^T)_{n_{fd+1} \leqslant i \leqslant n_{dof},1 \leqslant j \leqslant n_{fd}} \\
-	  \tau_2 \GETS C'_2 + H_{21} \ddot{q}_1 \\
-	  \tau \GETS Q^T \begin{bmatrix} \tau_1 & \tau_2 \end{bmatrix}^T \\
-	  \ddot{q} \GETS Q^T \begin{bmatrix} \ddot{q}_1 & \ddot{q}_2 \end{bmatrix}^T
-	\END 
-	\end{pseudocode}
-	\end{column}
-	\end{columns}
-	\end{spacing}
-  \vfill
-	  
 \end{frame}
 
 %==========================================================
@@ -864,7 +764,7 @@
   \begin{itemize}
 	  \item rotations $X_J$: axe parallèle à $Ox$ ou $Oy$ ou $Oz$ du repère lié au corps par $X^T$
 	  \item $\hookrightarrow$ calcul des transformations $^sXp$ dans \verb;jcalc;
-	  \item $\hookrightarrow$ calcul des vitesses et accélérations composées dans \verb;jcalc;.
+	  \item $\hookrightarrow$ calcul des vitesses composées dans \verb;jcalc;.
   \end{itemize}
   \end{block}
   
@@ -881,7 +781,7 @@
 \setmyFiguresFile{optimisations}
 
 \begin{frame}
-  \frametitle{Définitions...}
+  \frametitle{Définitions...} \hypertarget{ch_optimisations}{}
   
   	\begin{columns}
 	\begin{column}{.48\textwidth}
@@ -892,31 +792,19 @@
   \end{column}
   \end{columns}
   
+  \hyperlink{app_algSpat2}{\beamergotobutton{(i)}}
 \end{frame}
 
 \begin{frame}
   \frametitle{Quelques exemples pour le CRBA optimisé (Hybrid CRBA)}
-  
-	\begin{figure}[H]
-	  \begin{center}
-%   \begin{overprint}
-	  \includegraphics[width=\textwidth, page=4]{figs/\myFiguresFile}
-	  \caption{Calcul de $H$ complet}
-	  \includegraphics[width=.9\textwidth, page=6]{figs/\myFiguresFile}
-	  \caption{Optimisation $H_{11}$}
-%   	\end{overprint}
-	  \end{center}
-	\end{figure}
-	
-\end{frame}
 
-\begin{frame}
 	\begin{figure}[H]
 	  \begin{center}
-	  \includegraphics[width=.9\textwidth, page=6]{figs/\myFiguresFile}
+	  \vspace{-.2cm}
+	  \includegraphics[width=.85\textwidth, page=6]{figs/\myFiguresFile}
 	  \caption{Optimisation $H_{11}$}
-	  \includegraphics[width=.9\textwidth, page=7]{figs/\myFiguresFile}
-	  \caption{Optimisation $H_{11}$ + $H_{21}$}
+	  \includegraphics[width=.7\textwidth, page=7]{figs/\myFiguresFile}
+	  \vspace{-.2cm}\caption{Optimisation $H_{11}$ + $H_{21}$}
 	  \end{center}
 	\end{figure}
 	
@@ -1016,7 +904,7 @@
 	\begin{table}[H]
 	\begin{center}
 	\begin{tabular}[H]{|l|O|O|l|l|E|E|}
-	\multicolumn{5}{c}{}                                                                           & \multicolumn{2}{c}{\fbox{30\% gain}} \\
+	\multicolumn{5}{c}{}                                                                           & \multicolumn{2}{c}{\colorbox{green}{30\% gain}} \\
 	\hline
 	Version d'implémentation                   & \multicolumn{2}{o|}{(1)}  & \multicolumn{2}{c|}{(2)} & \multicolumn{2}{e|}{(4)} \\ \hline \hline
 	                                           & $\mu s$      & (\%)       & $\mu s$     & (\%)       & $\mu s$        & (\%)    \\ \hline
@@ -1028,7 +916,7 @@
 	e: reconstruction de $\tau$ et $\ddot{q}$  & 0.677407     & 0.12       & 0.683246    & 0.13       & 0              & 0       \\
 	\hline
 	\end{tabular}
-	\caption[Table caption text]{Durées de traitement (en $\mu s$) des étapes du CHDA: les optimisations spécifiques au CHDA. On a reporté, pour chacune d'elles le gain relatif par rapport à un traitement de référence qui est l'étape 1 (RNEA classique).}
+	\caption[Table caption text]{Optimisations (1), (2) et (4). ( (3) $\rightarrow$ aucun gain). Référence de mesure $\rightarrow$ étape (1) (RNEA).}
 	\label{table:performancesOptimSpecifCHDA}
 	\end{center}
 	\end{table}
@@ -1040,51 +928,36 @@
 \end{frame}
 
 %==========================================================
-\section{Méthodes}
-
-\subsection{Méthodes de développement et de validation}
+\section{Méthodes et outils de développement}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Cycle de développement}
   
   \setmyFiguresFile{cycleDev}
-  \dispFig[H]{1}{.9\textwidth}{Cycle de développement}{}
+  \dispFig[H]{1}{.9\textwidth}{}{}
   
 \end{frame}
 
 \begin{frame}
-
+  \frametitle{Méthodes et outils}
+  
   tests unitaires et Validation:
   \begin{itemize}
-		\item exécution pas à pas des fonctions créées (gdb, qtcreator)
 		\item validation de résultats d'algorithmes: traitements alternatifs (HCRBA, RNEA/CRBA)
 		\item Méta fonctions: comparaison phase compilation vs exécution
 		\item Matrice de permutation: vérification fonctionnelle et des propriétés 
 		\item Génération aléatoire de vecteurs de test $q$, $\dot{q}$, $\ddot{q}$, $\tau$
 		\item Mesures de temps d'exécution sur 100000 itérations
   \end{itemize}
-
-\end{frame}
-
-%==========================================================
-
-\subsection{Outils de développement}
-
-\begin{frame}
-  \frametitle{}
-  Langages et outils de développement:
-  \begin{itemize}
-  \item template C++ et Méta programmation
-  \item BOOST : méthode de test $\curvearrowright$ suite de tests unitaires \emph{metapo} \\
-                création aisée de tableaux de types ou d'objets templatés
-  \item Eigen
-  \item cmake
-  \end{itemize}
   
   \bigskip
-  Outils d'édition, analyse et gestion de configuration:\\
-  emacs, Qtcreator, gdb, github, git, gitk, cachegrind
-    
+  Langages et outils de développement:
+  \begin{itemize}
+  \item template C++ et Méta programmation, Eigen, BOOST
+  \item git, cmake
+  \item gdb, cachegrind
+  \end{itemize}
+
 \end{frame}
 
 %==========================================================
@@ -1094,10 +967,20 @@
 \begin{frame}
   \frametitle{}
   
-  \begin{center}
-  \centering \huge{CONCLUSION}
-  \end{center}
+  \begin{block}{acquis personnels}
+  \begin{itemize}
+  \item aperçu de l'activité de recherche
+  \item concepts et techniques
+  \end{itemize}
+  \end{block}
   
+  \begin{block}{Prochains objectis}
+  \begin{itemize}
+  \item long terme: Recherche dans un laboratoire ou en R&D dans une entreprise
+  \item court terme: développer la compétence en dynamique des corps
+  \end{itemize}
+  \end{block}
+ 
 \end{frame}
 
 %==========================================================
@@ -1107,10 +990,10 @@
 
 \subsection{Filtrage Dynamique}
 
-\hypertarget{app_filDyn}{}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{} 	\hyperlink{ch_ID}{\beamergotobutton{(i)}}
+  \hypertarget{app_filDyn}{}
   
   \setmyFiguresFile{generateurDeMarche}
   \dispFig[H]{1}{\textwidth}{Générateur de marche et le filtre dynamique}{}
@@ -1133,10 +1016,30 @@
 
 \subsection{Algèbre Spatiale}
 
-\hypertarget{app_algSpat}{}
+\begin{frame}
+  \frametitle{L'arbre cinématique, un graphe connecté, sans boucle} \hyperlink{ch_permutation}{\beamergotobutton{(i)}}
+  \hypertarget{app_algSpat1}{}
+  
+  \setmyFiguresFile{figures}
+  \dispFig[H]{7}{.7\textwidth}{Graphe connecté de l'arbre et $\kappa(i),\mu(i),\lambda(i),\nu(i)$}{plucker}
+  
+  \note{Modélisation de l'arbre cinématique: définition du graphe connecté}
+  \begin{itemize}
+	  \item numérotation ascendante $i \in [1,9]$ telle que $\lambda(i) < i$
+	  \item arc $i$ connecte corps $i$ à son parent
+\note{$p(i)$ est le noeud \emph{prédécesseur} et $s(i)$ est le noeud \emph{successeur} de l'articulation $i$}
+		\item $\lambda(i)$ est le noeud \emph{parent} du corps $i$
+\note{$\forall i \neq 0: \kappa(i)$ est l'ensemble des noeuds sur le chemin entre le noeud $i$ et la base (noeud $0$) \\
+		  $\forall i: \mu (i)$  est l'ensemble des enfants du noeud $i$ \\
+		  $\forall i: \nu (i)$  est l'ensemble des noeuds supportés par l'articulation $i$, ou encore, inclus dans le sous-arbre suspendu au noeud $i$}
+		\item $\nu(fd) = \bigcup_{i \in fd}\nu(i)$
+	\end{itemize}
+  
+\end{frame}
 
 \begin{frame}[allowframebreaks]
-  \frametitle{Transformation de coordonnées $^jX_i$}
+  \frametitle{Transformation de coordonnées $^jX_i$} \hyperlink{ch_optimisations}{\beamergotobutton{(i)}}
+  \hypertarget{app_algSpat2}{}
   
   \setmyFiguresFile{modeleGeoEtArticulations}
   \dispFig[H]{1}{.8\textwidth}{Modèle géométrique d'un $\sigma$ de corps rigides.}{}
@@ -1181,9 +1084,82 @@
 \subsection{Algorithme hybride}
 
 \begin{frame}
-  \frametitle{}
+	\frametitle{Algorithme complet:}
+
+  \setmyFiguresFile{optimisations}
+	  
+	\begin{spacing}{1.5}
+	\begin{columns}[T]\scriptsize
+%	\setlength{\columnsep}{10pt}
+%	\setlength{\columnseprule}{0.5pt}
+	\begin{column}{.48\textwidth}
+	\begin{pseudocode}{hybridDynamics}{model, q, \dot{q}, \ddot{q}, \tau}
+	(1)
+	\BEGIN
+	  \textnormal{\# Calul de $C'$, $C'_1$ et $C'_2$} \\
+	  \ddot{q}_{perm} \GETS Q \ddot{q} \\
+	  (\ddot{q}_{perm})_{i \in [1,fd]} \GETS 0 \\
+	  \ddot{q}_2 \GETS (\ddot{q}_{perm})_{i \in [fd+1,n_{dof}]} \\
+	  \ddot{q} \GETS Q^T \ddot{q}_{perm} \\
+	  model.torques \GETS rnea(model,q,\dot{q},\ddot{q}) \\
+	  C' \GETS getTorques(model) \\
+	  C'_{perm} \GETS Q C'\\
+	  C'_1 \GETS (C'_{perm})_{i \in [1,fd]} \\
+	  C'_2 \GETS (C'_{perm})_{i \in [fd+1,n_{dof}]}
+	\END \\
+	(2)
+	\BEGIN
+	  \textnormal{\# Calcul de $H_{11}$} \\
+	  model.H \GETS crba(model,q) \\
+	  H_{perm} \GETS Q model.H Q^T \\
+	  H_{11} \GETS (H_{perm})_{i,j \in [1,fd]} 
+	\END 
+	\end{pseudocode}
+	\end{column}
+	\begin{column}{.48\textwidth}
+	\begin{pseudocode}{ }{ }
+	(3) 
+	\BEGIN
+	  \textnormal{\# Résolution de l'équation $H_{11} \ddot{q}_1 = \tau_1 - C'_1$} \\
+	  \tau_{perm} \GETS Q \tau \\
+	  \tau_1 \GETS (\tau_{perm})_{i \in [1,fd]} \\
+	  \tau_2 \GETS (\tau_{perm})_{i \in [fd+1,n_{dof}]} \\
+	  b \GETS \tau_1 - C'_1 \\
+	  A \GETS H_{11} \\
+	  lltOfH11 \GETS LLT(A) \hfill \textnormal{\# création du solveur} \\
+	  \ddot{q}_1 \GETS lltOfH11.solve(b) \hfill \textnormal{\# résolution} 
+	\END \\
+	(4) 
+	\BEGIN
+	  \textnormal{\# Calcul de $\tau_2$ et reconstruction des vecteurs de} \\
+	  \textnormal{\# sortie $\ddot{q}$ et $\tau$} \\
+	   H_{21} \GETS (QHQ^T)_{n_{fd+1} \leqslant i \leqslant n_{dof},1 \leqslant j \leqslant n_{fd}} \\
+	  \tau_2 \GETS C'_2 + H_{21} \ddot{q}_1 \\
+	  \tau \GETS Q^T \begin{bmatrix} \tau_1 & \tau_2 \end{bmatrix}^T \\
+	  \ddot{q} \GETS Q^T \begin{bmatrix} \ddot{q}_1 & \ddot{q}_2 \end{bmatrix}^T
+	\END 
+	\end{pseudocode}
+	\end{column}
+	\end{columns}
+	\end{spacing}
+  \vfill
+	  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Quelques exemples pour le CRBA optimisé (Hybrid CRBA)}
   
-  
+	\begin{figure}[H]
+	  \begin{center}
+%   \begin{overprint}
+	  \includegraphics[width=\textwidth, page=4]{figs/\myFiguresFile}
+	  \caption{Calcul de $H$ complet}
+	  \includegraphics[width=.9\textwidth, page=6]{figs/\myFiguresFile}
+	  \caption{Optimisation $H_{11}$}
+%   	\end{overprint}
+	  \end{center}
+	\end{figure}
+	
 \end{frame}
 
 
