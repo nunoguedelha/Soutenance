@@ -203,31 +203,35 @@
 	\end{figure}
 	  
 	\framebreak
-	
-	\begin{block}{}
-	\begin{spacing}{1.2}
-	\begin{itemize}
-	\item Dynamique hybride (CHDA): généralisation de l'ID et de la FD.\\
-	      $\rightarrow$ Simulation + fidèle (flexibilité) \\
-        $\rightarrow$ Simulation simplifiée (articulations "parfaites") \\
-        $\rightarrow$ Améliorer contrôle de robots à base flottante \\
-                      $\hookrightarrow$ $\tau_0$ connu = 0 $\rightarrow$ calcul de $\ddot{q}_0$! \\
-                                        (estimation du CoM affinée)
-\note{pour chaque articulation, on connaît soit le couple (art. $fd$) soit l'accélération (art. $id$). L'algo calcule toutes les inconnues ($fd$ $\longrightarrow$ FD, $id$ $\longrightarrow$ ID)}
-  \end{itemize}
-  \end{spacing}
-  \end{block}
-	
-	\begin{equation}
-	\bsy{\begin{bmatrix} \ddot{q}_1 \\ \ddot{q}_2	\end{bmatrix}}, \bsy{\begin{bmatrix} \tau_1 \\ \tau_2	\end{bmatrix}} = \mathrm{CHDA}(model,\bsy{q,\dot{q},\begin{bmatrix} 0 \\ \ddot{q}_2	\end{bmatrix},\begin{bmatrix} \tau_1 \\ 0	\end{bmatrix}})
-	\end{equation}
-	
-	\framebreak
-	
 	\begin{figure}[H]
-	\includegraphics[width=.55\textwidth]{figs/actionneurRaideurVariable}
-	\includegraphics[width=.45\textwidth]{figs/jambeFlexibleRaideurVariable}
+	\begin{columns}[T]
+	  \begin{column}{.7\textwidth}
+			\begin{block}{}
+			\begin{spacing}{1.2}
+			\begin{itemize}
+			\item Dynamique hybride (CHDA): \\
+			      généralisation de l'ID et de la FD.\\
+			      $\rightarrow$ Simulation + fidèle (flexibilité) \\
+		        $\rightarrow$ Simulation simplifiée (articulations "parfaites") \\
+		        $\rightarrow$ Améliorer contrôle de robots à base flottante \\
+		                      $\hookrightarrow$ $\tau_0$ connu = 0 $\rightarrow$ calcul de $\ddot{q}_0$! \\
+		                                        (estimation du CoM affinée)
+		\note{pour chaque articulation, on connaît soit le couple (art. $fd$) soit l'accélération (art. $id$). L'algo calcule toutes les inconnues ($fd$ $\longrightarrow$ FD, $id$ $\longrightarrow$ ID)}
+		  \end{itemize}
+		  \end{spacing}
+		  \end{block}
+			
+			\begin{equation}
+			\bsy{\begin{bmatrix} \ddot{q}_1 \\ \ddot{q}_2	\end{bmatrix}}, \bsy{\begin{bmatrix} \tau_1 \\ \tau_2	\end{bmatrix}} = \mathrm{CHDA}\left( model,\bsy{q,\dot{q},\begin{bmatrix} 0 \\ \ddot{q}_2	\end{bmatrix},\begin{bmatrix} \tau_1 \\ 0	\end{bmatrix}}\right)
+			\end{equation}
+		\end{column}
+		\begin{column}{.3\textwidth}
+    		\includegraphics[width=\textwidth]{figs/actionneurRaideurVariable}\\
+      \includegraphics[width=\textwidth]{figs/jambeFlexibleRaideurVariable}
+		\end{column}
+	\end{columns}
 	\end{figure}
+	\framebreak
 	
 \end{frame}
 
@@ -849,7 +853,7 @@
   
 \end{frame}
 
-\begin{frame}\scriptsize
+\begin{frame}\small
   \frametitle{Résultats: mesure de durée d'exécution}
 
   \note{Mesure des temps d'exécutions relatifs à un RNEA classique
@@ -865,7 +869,9 @@
 	
 	\note{les optimisations sont cumulées dans l'ordre de numérotation. Voici l'ensemble des mesures réalisées sur notre modèle de robot humanoïde}
 	
+	\bigskip
 	\begin{flushleft}
+	\begin{footnotesize}
 	
 	\begin{table}[H]
 	\begin{center}
@@ -884,6 +890,7 @@
 	\end{center}
 	\end{table}
 	
+	\end{footnotesize}
 	\end{flushleft}
 	
 \end{frame}
