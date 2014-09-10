@@ -53,13 +53,20 @@
 
 %%%%%%%%%%%%%%%%%
 \author{Nuno Guedelha}
-\title{Implémentation et application d'un algorithme de Dynamique Hybride}
+\title{Implémentation d'un algorithme de Dynamique Hybride}
 %\setbeamercovered{transparent} 
 \setbeamertemplate{navigation symbols}{} 
 %\logo{} 
-\institute{LAAS-CNRS}
+\institute{UPS / LAAS-CNRS \\
+\vspace{1.3cm}
+Stage (M2 IRR) du 03/03/2014 du 29/08/2014 \\
+\vspace{1.3cm}
+Maître de stage: Olivier STASSE \\
+Tuteur universitaire: Sylvain DUROLA}
 \date{} 
-%\subject{} 
+
+\subject{} 
+
 
 \setbeamertemplate{footline}{
 \leavevmode%
@@ -87,6 +94,7 @@
 \begin{frame}
 \titlepage
 \end{frame}
+
 %==========================================================
 
 \begin{frame}{Plan}
@@ -105,16 +113,14 @@
   \begin{block}{Projet professionnel}
   \begin{itemize}
     \item première expérience dans l'embarqué et le temps réel
-    \item nouveau cap: la robotique mobile et le Master 2 IRR
-    \item Objectif: chercheur en Robotique (entreprise ou laboratoire)
+    \item Objectif: chercheur en Robotique mobile (entreprise ou laboratoire)
   \end{itemize}
   \end{block}
   \begin{block}{Le LAAS et Gepetto}
   \begin{itemize}
     \item Gepetto: expertise en analyse, génération de mouvements  
-    \item Approche fondamentale, modélisation dynamique, contrôle, planification de mouvements
-    \item {Intégration dans des packages open source \\
-          $\hookrightarrow$ metapod: librairie de modélisation dynamique}
+    \item Approche fondamentale, modélisation
+    \item Intégration $\hookrightarrow$ librairies ou plate-formes open source: metapod,...
     \note{}
   \end{itemize}
   \end{block}
@@ -131,16 +137,13 @@
 \note{Roy Featherstone: (“Rigid Body Dynamics Algorithm",2008) Chercheur spécialisé en modélisation dynamique de robots. Ph.D. à Edinburgh -> univ Australian National -> Professeur invité à l'IIT}
 		\item C++ template méta-programmation
 		\item combiner à Eigen \note{librairie templatée}
-		\item benchmarking
   \end{itemize}
   \end{block}
 	
 	\bigskip
-  Réflexion sur l'application de la Dynamique Hybride:
-  	\begin{itemize}
-		\item modélisation d'articulations flexibles ("compliantes")
-		\item commande de robot ayant une base flottante
-  \end{itemize}
+	\begin{block}{}
+	Réflexion sur l'application de la Dynamique Hybride
+	\end{block}
 	
 \end{frame}
 %==========================================================
@@ -227,7 +230,8 @@
 		\end{column}
 		\begin{column}{.3\textwidth}
     		\includegraphics[width=\textwidth]{figs/actionneurRaideurVariable}\\
-      \includegraphics[width=\textwidth]{figs/jambeFlexibleRaideurVariable}
+      \includegraphics[width=\textwidth]{figs/jambeFlexibleRaideurVariable}\\
+      \footnotesize{(Source: Louis Mouzet)}
 		\end{column}
 	\end{columns}
 	\end{figure}
