@@ -147,6 +147,8 @@
 
 \section{Modélisation Dynamique}
 
+\subsection{}
+
 \begin{frame}[allowframebreaks]
   \frametitle{Cas d'utilisation}
   
@@ -234,6 +236,8 @@
 
 \section{Contraintes en performances}
 
+\subsection{}
+
 \begin{frame}
   \frametitle{Contraintes et méta programmation}
 
@@ -284,6 +288,8 @@
 %==========================================================
 
 \section{Algèbre Spatiale: formalisme}
+
+\subsection{}
 
 \setmyFiguresFile{figures}
 
@@ -854,7 +860,7 @@
 	\item matrices de passage à axes fixes prédéfinis
 	\item HCRBA(CRBA hybride) $H_{11}-H_{12}-H_{21}$
 	\item utilisation du module \emph{Eigen} de Sparsité
-	\item HCRBA $H_{11}$ seule + Dynamique Inverse différenciel ($\mathrm{ID}_\delta$), sans la sparsité \emph{Eigen}
+	\item HCRBA $H_{11}$ seule + Dynamique Inverse différentielle ($\mathrm{ID}_\delta$), sans la sparsité \emph{Eigen}
 	\end{enumerate}
 	
 	\note{les optimisations sont cumulées dans l'ordre de numérotation. Voici l'ensemble des mesures réalisées sur notre modèle de robot humanoïde}
@@ -938,6 +944,8 @@
 %==========================================================
 \section{Méthodes et outils de développement}
 
+\subsection{}
+
 \begin{frame}
   \frametitle{Cycle de développement}
   
@@ -949,11 +957,9 @@
 \begin{frame}
   \frametitle{Méthodes et outils}
   
-  tests unitaires et Validation:
+  Validation de résultats d'algorithmes:
   \begin{itemize}
-		\item validation de résultats d'algorithmes: traitements alternatifs (HCRBA, RNEA/CRBA)
-		\item Méta fonctions: comparaison phase compilation vs exécution
-		\item Matrice de permutation: vérification fonctionnelle et des propriétés 
+		\item Traitements alternatifs (HCRBA, RNEA/CRBA)
 		\item Génération aléatoire de vecteurs de test $q$, $\dot{q}$, $\ddot{q}$, $\tau$
 		\item Mesures de temps d'exécution sur 100000 itérations
   \end{itemize}
@@ -971,6 +977,8 @@
 %==========================================================
 
 \section{Conclusion et perspectives}
+
+\subsection{}
 
 \begin{frame}
   \frametitle{Conclusion}
